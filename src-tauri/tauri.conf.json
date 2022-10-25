@@ -1,0 +1,82 @@
+{
+  "$schema": "..\\node_modules/@tauri-apps/cli\\schema.json",
+  "build": {
+    "beforeBuildCommand": "npm run build",
+    "beforeDevCommand": "npm run dev",
+    "devPath": "http://localhost:8080",
+    "distDir": "../dist"
+  },
+  "package": {
+    "productName": "Hades Save Editor",
+    "version": "1.0.0"
+  },
+  "tauri": {
+    "allowlist": {
+      "dialog": { "all": true },
+      "path": { "all": true },
+      "fs": {
+        "all": true,
+        "scope": [
+          "$APP/**",
+          "$DESKTOP/**",
+          "$DOCUMENT/**",
+          "$RESOURCE/**"
+        ]
+      },
+      "protocol": {
+        "all": true,
+        "asset": true,
+        "assetScope": [
+          "$APP/**",
+          "$DESKTOP/**",
+          "$DOCUMENT/**",
+          "$RESOURCE/**"
+        ]
+      },
+      "window": { "all": true }
+    },
+    "bundle": {
+      "active": true,
+      "category": "DeveloperTool",
+      "copyright": "",
+      "deb": { "depends": [] },
+      "externalBin": [],
+      "icon": [ "icons/32x32.png", "icons/128x128.png", "icons/128x128@2x.png", "icons/icon.icns", "icons/icon.ico" ],
+      "identifier": "dev.tormak.hades-save-editor",
+      "longDescription": "",
+      "macOS": {
+        "entitlements": null,
+        "exceptionDomain": "",
+        "frameworks": [],
+        "providerShortName": null,
+        "signingIdentity": null
+      },
+      "resources": [],
+      "shortDescription": "",
+      "targets": "all",
+      "windows": {
+        "certificateThumbprint": null,
+        "digestAlgorithm": "sha256",
+        "timestampUrl": ""
+      }
+    },
+    "security": {
+      "csp": "default-src 'self'; img-src 'self' asset: https://asset.localhost; style-src 'self' 'unsafe-inline'",
+      "dangerousDisableAssetCspModification": ["style-src"]
+    },
+    "updater": {
+      "active": false
+    },
+    "windows": [
+      {
+        "fullscreen": false,
+        "height": 750,
+        "resizable": true,
+        "title": "Hades Save Editor",
+        "width": 1500,
+        "decorations": false,
+        "center": true
+      }
+    ]
+  }
+}
