@@ -3,7 +3,7 @@
   "build": {
     "beforeBuildCommand": "npm run build",
     "beforeDevCommand": "npm run dev",
-    "devPath": "http://localhost:8080",
+    "devPath": "http://localhost:1420",
     "distDir": "../dist"
   },
   "package": {
@@ -70,10 +70,10 @@
     "windows": [
       {
         "fullscreen": false,
-        "height": 750,
+        "height": 530,
         "resizable": true,
         "title": "Hades Save Editor",
-        "width": 1500,
+        "width": 760,
         "decorations": false,
         "center": true
       }

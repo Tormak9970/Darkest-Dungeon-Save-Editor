@@ -16,7 +16,8 @@
   },
   "dependencies": {
     "@petamoriken/float16": "^3.6.6",
-    "@tauri-apps/api": "^1.1.0"
+    "@tauri-apps/api": "^1.1.0",
+    "@zerodevx/svelte-toast": "^0.8.0"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^1.0.1",

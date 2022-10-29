@@ -1,14 +1,93 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Tauri + Svelte + TS</title>
-  </head>
+<head>
+	<meta charset='utf-8'>
+	<meta name='viewport' content='width=device-width,initial-scale=1'>
 
-  <body>
+	<title>Hades Save Editor</title>
+
+	<link rel='icon' type='image/png' href='/vite.svg'>
+
+	<style>
+		@font-face {
+			font-family: "Source Sans Pro";
+			src: url("/SourceSansPro-Regular.ttf") format("truetype");
+			font-weight: normal;
+			font-style: normal;
+		}
+		@font-face {
+			font-family: "Source Sans Pro";
+			src: url("/SourceSansPro-Italic.ttf") format("truetype");
+			font-weight: normal;
+			font-style: italic;
+		}
+		@font-face {
+			font-family: "Source Sans Pro";
+			src: url("/SourceSansPro-Bold.ttf") format("truetype");
+			font-weight: bold;
+			font-style: normal;
+		}
+		@font-face {
+			font-family: "Source Sans Pro";
+			src: url("/SourceSansPro-BoldItalic.ttf") format("truetype");
+			font-weight: bold;
+			font-style: italic;
+		}
+		@font-face {
+			font-family: "Source Sans Pro";
+			src: url("/SourceSansPro-Light.ttf") format("truetype");
+			font-weight: lighter;
+			font-style: normal;
+		}
+		@font-face {
+			font-family: "Source Sans Pro";
+			src: url("/SourceSansPro-LightItalic.ttf") format("truetype");
+			font-weight: lighter;
+			font-style: italic;
+		}
+
+		html, body {
+			margin: 0;
+			padding: 0;
+			width: 100%;
+			height: 100%;
+
+			background-color: #1a1a1a;
+			color: rgb(231, 231, 231);
+			font-family: 'Source Sans Pro', sans-serif;
+
+			overflow: hidden;
+		}
+
+		::-webkit-scrollbar {
+			width: 8px;
+			height: 8px;
+		}
+		::-webkit-scrollbar-track {
+			background: transparent;
+		}
+		::-webkit-scrollbar-thumb {
+			background: #383838;
+			border-radius: 4px;
+		}
+		::-webkit-scrollbar-thumb:hover {
+			background: #82b74bff;
+		}
+		::-webkit-scrollbar-corner { background: transparent; }
+
+		#app {
+			width: 100%;
+			height: 100%;
+
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+		}
+	</style>
+</head>
+
+<body>
     <div id="app"></div>
     <script type="module" src="/src/main.ts"></script>
-  </body>
+</body>
 </html>
