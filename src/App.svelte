@@ -25,6 +25,7 @@
 
     $: gModeDmgRedux = 0;
     $: hellMode = false;
+    $: giftingToAllEnabled = false;
 
     async function loadSave() {
         const docsDir = await path.documentDir();
@@ -51,11 +52,15 @@
 
     }
 
-    async function enableGiftingToAll() {
+    async function enableGiftingToAll() { giftingToAllEnabled = true; }
 
+    function inputHandler(e:Event, fieldName:string) {
+        if (fieldName == "godMode") {
+            gModeDmgRedux = parseInt((e.target as HTMLInputElement).value);
+        } else {
+            currencies[fieldName] = parseInt((e.target as HTMLInputElement).value);
+        }
     }
-
-    const inputHandler = (e:Event, fieldName:string) => {}
 </script>
 
 <div class="wrap">
