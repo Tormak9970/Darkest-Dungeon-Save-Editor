@@ -7,6 +7,7 @@
     import InputField from "./components/InputField.svelte";
 	import Titlebar from "./components/Titlebar.svelte";
     import Spacer from "./components/utils/Spacer.svelte";
+    import { SaveFile } from "./lib/models/SaveFile";
 
     $: filePath = null;
     $: version = null;
@@ -33,12 +34,21 @@
         // @ts-ignore
         const fPath = await fs.exists(saveDirPath) ? saveDirPath : "C:/";
 
-        await dialog.open({ directory: false, title: 'Select a save file', multiple: false, defaultPath: fPath }).then(async (file) => {
+        await dialog.open({ directory: false, title: 'Select a save file', multiple: false, defaultPath: fPath, filters: [{
+            name: 'Saves',
+            extensions: ['sav']
+        }, {
+            name: 'Controls',
+            extensions: ['ctrls']
+        }]}).then(async (file) => {
             if (file) {
                 const saveFilePath = file as string;
                 
                 if (saveFilePath) {
                     const dat = await fs.readBinaryFile(saveFilePath);
+                    const save = new SaveFile(dat.buffer);
+
+                    console.log(save);
                 }
             }
         });

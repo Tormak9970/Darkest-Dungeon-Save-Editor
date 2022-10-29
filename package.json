@@ -17,12 +17,14 @@
   "dependencies": {
     "@petamoriken/float16": "^3.6.6",
     "@tauri-apps/api": "^1.1.0",
-    "@zerodevx/svelte-toast": "^0.8.0"
+    "@zerodevx/svelte-toast": "^0.8.0",
+    "lz4": "^0.6.5"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^1.0.1",
     "@tauri-apps/cli": "^1.1.0",
     "@tsconfig/svelte": "^3.0.0",
+    "@types/lz4": "^0.6.0",
     "@types/node": "^18.7.10",
     "svelte": "^3.49.0",
     "svelte-check": "^2.8.0",

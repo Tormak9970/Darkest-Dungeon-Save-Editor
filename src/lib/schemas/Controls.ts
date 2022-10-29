@@ -1,5 +1,6 @@
 import { Reader } from "../utils/Reader";
-import { FILE_SIGNATURE } from "../utils/Utils";
+
+const decoder = new TextDecoder();
 
 export class KeyMap {
     keyBound:number;
@@ -28,22 +29,28 @@ export class KeyMap {
     }
 }
 
-export class VersionId {
+export class Controls {
+    reader:Reader;
     signature:string;
-    checksum:number;
-    version:number
+    totalKeyCount:number;
+    keyMapping:KeyMap[] = [];
 
     constructor(buffer:ArrayBuffer, offset:number) {
-        const reader = new Reader(buffer);
-        reader.seek(offset);
+        this.reader = new Reader(buffer);
+        this.reader.seek(offset);
 
-        const sig = reader.readUint32();
+        const sig = this.reader.readBytes(4);
 
-        if (sig.toString() == FILE_SIGNATURE) {
-            this.checksum = reader.readUint32();
-            this.version = reader.readUint32();
+        if (decoder.decode(sig) == "\x53\x47\x42\x31") {
+            this.reader.seek(2048, 1);
+            this.totalKeyCount = this.reader.readUint32();
+
+            for (let i = 0; i < this.totalKeyCount; i++) {
+                const keyMap = new KeyMap(this.reader);
+                this.keyMapping.push(keyMap);
+            }
         } else {
-            throw new Error(`Expected file signature to be ${FILE_SIGNATURE} but it was ${sig}`);
+            throw new Error(`Expected file signature to be ${"\x53\x47\x42\x31"} but it was ${sig}`);
         }
     }
 }
