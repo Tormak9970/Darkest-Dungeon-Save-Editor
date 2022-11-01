@@ -1,5 +1,5 @@
 {
-  "name": "hades-save-editor",
+  "name": "darkestdungeon-save-editor",
   "private": true,
   "version": "1.0.0",
   "type": "module",
@@ -18,7 +18,8 @@
     "@petamoriken/float16": "^3.6.6",
     "@tauri-apps/api": "^1.1.0",
     "@zerodevx/svelte-toast": "^0.8.0",
-    "lz4": "^0.6.5"
+    "lz4": "^0.6.5",
+    "vitest": "^0.24.5"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^1.0.1",

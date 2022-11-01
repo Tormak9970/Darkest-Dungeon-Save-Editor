@@ -7,7 +7,7 @@
     "distDir": "../dist"
   },
   "package": {
-    "productName": "Hades Save Editor",
+    "productName": "DarkestDungeon Save Editor",
     "version": "1.0.0"
   },
   "tauri": {
@@ -42,7 +42,7 @@
       "deb": { "depends": [] },
       "externalBin": [],
       "icon": [ "icons/32x32.png", "icons/128x128.png", "icons/128x128@2x.png", "icons/icon.icns", "icons/icon.ico" ],
-      "identifier": "dev.tormak.hades-save-editor",
+      "identifier": "dev.tormak.darkestdungeon-save-editor",
       "longDescription": "",
       "macOS": {
         "entitlements": null,
@@ -72,7 +72,7 @@
         "fullscreen": false,
         "height": 530,
         "resizable": true,
-        "title": "Hades Save Editor",
+        "title": "DarkestDungeon Save Editor",
         "width": 760,
         "decorations": false,
         "center": true
