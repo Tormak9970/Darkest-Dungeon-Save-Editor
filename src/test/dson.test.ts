@@ -49,11 +49,11 @@ describe("Test Suite for Dson class", () => {
     });
 
     test("Meta1Block Tests", () => {
-        console.log(meta1Block);
+        // console.log(meta1Block);
     });
 
     test("Meta2Block Tests", () => {
-        // console.log(meta2Block);
+        console.log(meta2Block);
     });
 
     test("Data Tests", () => {

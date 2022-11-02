@@ -124,11 +124,17 @@ class DsonMeta2BlockEntry {
 }
 
 export class DsonData {
+    fields:DsonField[] = [];
+    
     constructor(reader:Reader, dson:Dson) {
 
     }
 }
 class DsonField {
+    name:string;
+    alignment:number;
+    data:Uint8Array;
+
     constructor(reader:Reader) {
 
     }
@@ -146,8 +152,8 @@ export class Dson {
         reader.seek(this.header.meta1Offset);
         this.meta1Block = new DsonMeta1Block(reader, this.header);
         
-        // reader.seek(this.header.meta2Offset);
-        // this.meta2Block = new DsonMeta2Block(reader, this.header);
+        reader.seek(this.header.meta2Offset);
+        this.meta2Block = new DsonMeta2Block(reader, this.header);
 
         // reader.seek(this.header.dataOffset);
         // this.data = new DsonData(reader, this);
