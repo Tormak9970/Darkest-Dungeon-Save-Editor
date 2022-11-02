@@ -18,6 +18,7 @@
 import type { Reader } from "../utils/Reader";
 
 const HEADER_SIZE = 64;
+const MAGIC_NUMBER = 0xB101; //45313
 
 export class DsonHeader {
     magicNr:number;
@@ -36,7 +37,7 @@ export class DsonHeader {
 
     constructor(reader:Reader) {
         this.magicNr = reader.readUint32();
-        if (this.magicNr != 0x01B100) throw new Error(`Expected magic number to be ${0x01B100} but was ${this.magicNr}`);
+        if (this.magicNr != MAGIC_NUMBER) throw new Error(`Expected magic number to be ${MAGIC_NUMBER} but was ${this.magicNr}`);
 
         reader.readInt16(); //empty bytes
         this.revision = reader.readUint16();
@@ -66,7 +67,7 @@ export class DsonHeader {
 }
 
 export class DsonMeta1Block {
-    entries:DsonMeta1BlockEntry[];
+    entries:DsonMeta1BlockEntry[] = [];
 
     constructor(reader:Reader, header:DsonHeader) {
         for (let i = 0; i < header.numMeta1Entries; i++) {
@@ -82,7 +83,7 @@ class DsonMeta1BlockEntry {
     numAllChildren:number;
 
     constructor(reader:Reader) {
-        this.parentIdx = reader.readUint32();
+        this.parentIdx = reader.readInt32();
         this.meta2EntryIdx = reader.readUint32();
         this.numDirectChildren = reader.readUint32();
         this.numAllChildren = reader.readUint32();
@@ -91,7 +92,7 @@ class DsonMeta1BlockEntry {
 
 
 export class DsonMeta2Block {
-    entries:DsonMeta2BlockEntry[];
+    entries:DsonMeta2BlockEntry[] = [];
 
     constructor(reader:Reader, header:DsonHeader) {
         for (let i = 0; i < header.numMeta2Entries; i++) {
@@ -145,10 +146,10 @@ export class Dson {
         reader.seek(this.header.meta1Offset);
         this.meta1Block = new DsonMeta1Block(reader, this.header);
         
-        reader.seek(this.header.meta2Offset);
-        this.meta2Block = new DsonMeta2Block(reader, this.header);
+        // reader.seek(this.header.meta2Offset);
+        // this.meta2Block = new DsonMeta2Block(reader, this.header);
 
-        reader.seek(this.header.dataOffset);
-        this.data = new DsonData(reader, this);
+        // reader.seek(this.header.dataOffset);
+        // this.data = new DsonData(reader, this);
     }
 }

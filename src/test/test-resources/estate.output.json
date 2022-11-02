@@ -1,0 +1,71 @@
+{
+    "base_root" : {
+        "version" : 34,
+        "tampering" : {
+            "tampering_manager" : {
+                "foundLocalTamperedFile" : false,
+                "foundGlobalTamperedFile" : false
+            }
+        },
+        "wallet" : {
+            "0" : {
+                "amount" : 4657,
+                "type" : "gold"
+            },
+            "1" : {
+                "amount" : 920,
+                "type" : "bust"
+            },
+            "2" : {
+                "amount" : 990,
+                "type" : "portrait"
+            },
+            "3" : {
+                "amount" : 91,
+                "type" : "deed"
+            },
+            "4" : {
+                "amount" : 299,
+                "type" : "crest"
+            },
+            "5" : {
+                "amount" : 184,
+                "type" : "shard"
+            },
+            "6" : {
+                "amount" : 0,
+                "type" : "memory"
+            },
+            "7" : {
+                "amount" : 0,
+                "type" : "blueprint"
+            }
+        },
+        "trinkets" : {
+            "items" : {
+                "0" : {
+                    "id" : "damage_stone",
+                    "type" : "trinket",
+                    "amount" : 1
+                },
+                "1" : {
+                    "id" : "padlock_5",
+                    "type" : "trinket",
+                    "amount" : 1
+                },
+                "2" : {
+                    "id" : "bleeding_pendant",
+                    "type" : "trinket",
+                    "amount" : 1
+                }
+            }
+        },
+        "darkest_dungeon_trinket_unlocks" : { },
+        "performed_blueprint_correction_check" : true,
+        "endless_wave_highscore" : 0,
+        "was_endless_wave_highscore_tampered" : false,
+        "estate_items" : {
+            "items" : { }
+        }
+    }
+}
