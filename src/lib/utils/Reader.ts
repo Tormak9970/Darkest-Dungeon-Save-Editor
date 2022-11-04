@@ -49,6 +49,14 @@ let GLOBAL_ENDIANNESS = true;
     }
 
     /**
+     * Returns the number of bytes left in the reader
+     * @returns the number of bytes left in the reader
+     */
+    remaining(): number {
+        return this.length - this.offset;
+    }
+
+    /**
      * read the next byte and return a Uint8 array.
      * @param  {boolean} endianness whether or not to use littleEdian. Default is true.
      */
@@ -60,7 +68,7 @@ let GLOBAL_ENDIANNESS = true;
      */
     readChar(endianness?: boolean) {
         const res = this.#readI('getInt8', 1)(endianness);
-        return res.toString();
+        return String.fromCharCode(res);
     }
 
     /**

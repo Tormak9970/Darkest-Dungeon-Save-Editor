@@ -71,10 +71,14 @@ export class FieldType {
     // Unknown Type
     static TYPE_UNKNOWN = 12;
 
-    names:string[][];
+    static names:string[][];
 
     constructor(names?:string[][]) {
-        this.names = names ? names : null;
+        FieldType.names = names ? names : null;
+    }
+
+    static getKeyName(type:any): string {
+        return Object.keys(this).find(key => this[key] == type);
     }
 }
 
@@ -92,8 +96,9 @@ export class DsonTypes {
         }
     }
 
-    static isA(type:FieldType, names:string[]): boolean {
-        const arr = type.names;
+    // ! this may have issues, no sure
+    static isA(type:any, nameIter:{hasNext:()=>boolean, next:()=>string}): boolean {
+        const arr = FieldType.names;
 
         if (arr == null) {
             throw new Error("Not a hardcoded type: " + type);
@@ -104,16 +109,14 @@ export class DsonTypes {
 
         for (let i = 0; i < arr.length; i++) {
             match = true;
-            let ittrIdx = 0;
-            checkString = names[0];
+            checkString = nameIter.next();
 
             for (let j = arr[i].length - 1; j >= 0; j--) {
                 if (checkString == null || !(arr[i][j] == "*") || arr[i][j] == checkString) {
                     match = false;
                     break;
                 }
-                ittrIdx = names[ittrIdx+1] ? ittrIdx+1 : ittrIdx;
-                checkString = names[ittrIdx];
+                checkString = nameIter.hasNext() ? nameIter.next() : null;
             }
             
             if (match) return true;
