@@ -5,17 +5,17 @@ const typeEnum = {
 }
 
 export class FieldType {
-    TYPE_OBJECT = 0; // has a Meta1Block entry
-    TYPE_BOOL = 1; // 1 byte, 0x00 or 0x01
+    static TYPE_OBJECT = 0; // has a Meta1Block entry
+    static TYPE_BOOL = 1; // 1 byte, 0x00 or 0x01
     // Needed for saving
-    TYPE_CHAR = [
+    static TYPE_CHAR = [
         [ "requirement_code" ]
     ]; // 1 byte, only seems to be used in upgrades.json
-    TYPE_TWOBOOL = 3; // aligned, 8 bytes (only used in gameplay options??). emitted as [true, true]
-    TYPE_STRING = 4; // aligned, int size + null-terminated string of size (including \0)
-    TYPE_FILE = 5; // Actually an object, but encoded as a string (embedded DsonFile). used in
+    static TYPE_TWOBOOL = 3; // aligned, 8 bytes (only used in gameplay options??). emitted as [true, true]
+    static TYPE_STRING = 4; // aligned, int size + null-terminated string of size (including \0)
+    static TYPE_FILE = 5; // Actually an object, but encoded as a string (embedded DsonFile). used in
                 // roster.json and map.json
-    TYPE_INT = 6; // aligned, 4 byte integer
+                static TYPE_INT = 6; // aligned, 4 byte integer
     // Begin hardcoded types = these types do not have enough characteristics to make
     // the heuristic work
     // As such, the field names/paths are hardcoded in DsonTypes
@@ -23,12 +23,12 @@ export class FieldType {
     // parsing fails
     // So they should be used sparingly and be as specific as possible
     // aligned, 4-byte float
-    TYPE_FLOAT = [
+    static TYPE_FLOAT = [
         [ "current_hp" ], [ "m_Stress" ], [ "actor", "buff_group", "*", "amount" ],
         [ "chapters", "*", "*", "percent" ], [ "non_rolled_additional_chances", "*", "chance" ]
     ];
     // aligned. 4-byte int [count], then [count] 4-byte integers
-    TYPE_INTVECTOR = [
+    static TYPE_INTVECTOR = [
         [ "read_page_indexes" ], [ "raid_read_page_indexes" ], [ "raid_unread_page_indexes" ], // journal.json
         [ "dungeons_unlocked" ], [ "played_video_list" ], // game_knowledge.json
         [ "trinket_retention_ids" ], // quest.json
@@ -52,7 +52,7 @@ export class FieldType {
     ];
     // aligned, 4-byte int [count], then [count] string length + null-terminated
     // string
-    TYPE_STRINGVECTOR = [
+    static TYPE_STRINGVECTOR = [
         [ "goal_ids" ], // quest.json
         [ "roaming_dungeon_2_ids", "*", "s" ], // campaign_mash.json
         [ "quirk_group" ], // campaign_log.json
@@ -61,15 +61,15 @@ export class FieldType {
         [ "backgroundGroups", "*", "background_table_entries" ], // raid.json
     ];
     // aligned, arbitrary number of 4-byte floats. emitted as [1.0, 2.0, ...]
-    TYPE_FLOATARRAY = [
+    static TYPE_FLOATARRAY = [
         [ "map", "bounds" ], [ "areas", "*", "bounds" ],
         [ "areas", "*", "tiles", "*", "mappos" ], [ "areas", "*", "tiles", "*", "sidepos" ], // map.json
     ];
-    TYPE_TWOINT = [
+    static TYPE_TWOINT = [
         [ "killRange" ]
     ]; // raid.json
     // Unknown Type
-    TYPE_UNKNOWN = 12;
+    static TYPE_UNKNOWN = 12;
 
     names:string[][];
 

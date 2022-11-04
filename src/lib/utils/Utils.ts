@@ -15,7 +15,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>
  */
-import { fs, path, tauri } from "@tauri-apps/api";
 
 export class Utils {
     private static encoder = new TextEncoder();
@@ -31,4 +30,18 @@ export class Utils {
 
         return hash;
     }
+}
+
+export class Stack {
+    private stack:any[] = [];
+
+    constructor() {}
+
+    push(obj:any) { this.stack.push(obj); }
+
+    peek() { return this.stack[this.stack.length-1]; }
+
+    isEmpty() { return this.stack.length == 0; }
+
+    pop() { return this.stack.pop(); }
 }

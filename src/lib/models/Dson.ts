@@ -16,6 +16,9 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>
  */
 import type { Reader } from "../utils/Reader";
+import { Stack } from "../utils/Utils";
+import { FieldType } from "./DsonTypes";
+import type { UnhashBehavior } from "./UnhashBehavior";
 
 const HEADER_SIZE = 64;
 const MAGIC_NUMBER = 0xB101; //45313
@@ -100,6 +103,19 @@ export class DsonMeta2Block {
             this.entries.push(entry);
         }
     }
+
+    findNextSmallestOffset(offset:number): number {
+        let bestIdx = -1;
+        let bestOffset = -1;
+        for (let i = 0; i < this.entries.length; i++) {
+            if (this.entries[i].offset > offset && (bestIdx == -1 || this.entries[i].offset < bestOffset)) {
+                bestIdx = i;
+                bestOffset = this.entries[i].offset;
+                break; // I feel like this will cause issues
+            }
+        }
+        return bestOffset;
+    }
 }
 class DsonMeta2BlockEntry {
     nameHash:number;
@@ -109,34 +125,127 @@ class DsonMeta2BlockEntry {
     nameLen:number; //name length with 0
     meta1BlockIdx:number;
 
-    // (fieldInfo & 0b1) as a boolean. If set, this is an object, if not set, this is a "primitive" field.
-    // (fieldInfo & 0b11111111100) >> 2 as an integer is the length of the field name including the \0 character.
-    // (fieldInfo & 0b1111111111111111111100000000000) >> 11 as an integer is the index into the Meta1Block entries if this is an object.
-
     constructor(reader:Reader) {
         this.nameHash = reader.readUint32();
         this.offset = reader.readUint32();
         this.fieldInfo = reader.readUint32();
-        this.isObject = Boolean(this.fieldInfo & 0x0b1);
+        this.isObject = (this.fieldInfo & 0b1) == 1;
         this.nameLen = (this.fieldInfo & 0b11111111100) >> 2;
         this.meta1BlockIdx = (this.fieldInfo & 0b1111111111111111111100000000000) >> 11;
     }
 }
 
+const decoder = new TextDecoder();
+
 export class DsonData {
     fields:DsonField[] = [];
     
-    constructor(reader:Reader, dson:Dson) {
+    constructor(reader:Reader, dson:Dson, unhashBehavior:UnhashBehavior) {
+        const fieldStack = new Stack();
+        const parentIdxStack = new Stack();
 
+        let runningObjIdx = -1;
+        parentIdxStack.push(runningObjIdx);
+        const rootFields:DsonField[] = [];
+
+        for (let i = 0; i < dson.meta2Block.entries.length; i++) {
+            const meta2Entry = dson.meta2Block.entries[i];
+            const field = new DsonField();
+            field.name = DsonData.readName(reader, dson.header.dataOffset + meta2Entry.offset, meta2Entry.nameLen-1);
+            
+            if (meta2Entry.isObject) {
+                field.meta1EntryIdx = meta2Entry.meta1BlockIdx;
+            }
+            field.meta2EntryIdx = i;
+            reader.seek(1, 1);
+            field.dataStartInFile = reader.offset
+
+            let nextOff = dson.meta2Block.findNextSmallestOffset(meta2Entry.offset);
+            let dataLen:number;
+
+            if (nextOff > 0) {
+                dataLen = nextOff - (field.dataStartInFile - dson.header.dataOffset);
+            } else {
+                dataLen = dson.header.dataLength - (field.dataStartInFile - dson.header.dataOffset); //accounts for dataStart being relative to begging of reader
+            }
+
+            field.rawData = reader.readBytes(dataLen);
+
+            if (meta2Entry.isObject) {
+                field.type = FieldType.TYPE_OBJECT;
+                field.setNumChildren(dson.meta1Block.entries[meta2Entry.meta1BlockIdx].numDirectChildren);
+                runningObjIdx++;
+            }
+
+            if (fieldStack.isEmpty()) {
+                rootFields.push(field);
+            } else {
+                if (!fieldStack.peek().addChild(field)) {
+                    throw new Error("Failed to add child");
+                }
+            }
+
+            if (field.type != FieldType.TYPE_OBJECT) {
+                field.guessType(unhashBehavior);
+            }
+
+            if (field.type == FieldType.TYPE_OBJECT) {
+                fieldStack.push(field);
+                parentIdxStack.push(runningObjIdx);
+            }
+
+            while (!fieldStack.isEmpty() && fieldStack.peek().type == FieldType.TYPE_OBJECT && fieldStack.peek().hashAllChildren()) {
+                fieldStack.pop();
+                parentIdxStack.pop();
+            }
+        }
+        
+        if (!fieldStack.isEmpty()) {
+            throw new Error("Not all fields have recieved children");
+        }
+        if (runningObjIdx + 1 != dson.header.numMeta1Entries) {
+            throw new Error("Wrong number of fields");
+        }
+
+        this.fields = rootFields;
+    }
+
+    static readName(reader:Reader, offset:number, nameLength:number): string {
+        reader.seek(offset);
+        const res = decoder.decode(reader.readBytes(nameLength));
+        return res;
     }
 }
 class DsonField {
     name:string;
     alignment:number;
-    data:Uint8Array;
+    meta1EntryIdx?:number;
+    meta2EntryIdx:number
+    dataStartInFile:number;
+    rawData:Uint8Array;
+    numChildren:number;
+    children:DsonField[];
+    type:any;
 
-    constructor(reader:Reader) {
+    constructor(reader?:Reader) {
+        this.children = [];
+    }
 
+    setNumChildren(numChildren:number): void {
+        this.numChildren = numChildren;
+    }
+
+    addChild(child:DsonField): boolean {
+        this.children.push(child);
+        return true;
+    }
+
+    guessType(behavior:UnhashBehavior): boolean {
+
+    }
+
+    hashAllChildren(): boolean {
+        return this.children.length == this.numChildren;
     }
 }
 
@@ -155,7 +264,7 @@ export class Dson {
         reader.seek(this.header.meta2Offset);
         this.meta2Block = new DsonMeta2Block(reader, this.header);
 
-        // reader.seek(this.header.dataOffset);
-        // this.data = new DsonData(reader, this);
+        reader.seek(this.header.dataOffset);
+        this.data = new DsonData(reader, this);
     }
 }

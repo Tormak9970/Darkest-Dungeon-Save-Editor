@@ -31,6 +31,7 @@ describe("Test Suite for Dson class", () => {
     const meta1Block = testDson.meta1Block;
     const meta2Block = testDson.meta2Block;
     const data = testDson.data;
+    console.log(data);
 
     test("Header Tests", () => {
         expect(header.magicNr).toEqual(0xB101);
@@ -53,7 +54,7 @@ describe("Test Suite for Dson class", () => {
     });
 
     test("Meta2Block Tests", () => {
-        console.log(meta2Block);
+        // console.log(meta2Block);
     });
 
     test("Data Tests", () => {
