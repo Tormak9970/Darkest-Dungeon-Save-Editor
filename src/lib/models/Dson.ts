@@ -17,8 +17,9 @@
  */
 import type { Reader } from "../utils/Reader";
 import { Stack } from "../utils/Utils";
+import { DsonField } from "./DsonField";
 import { FieldType } from "./DsonTypes";
-import type { UnhashBehavior } from "./UnhashBehavior";
+import { UnhashBehavior } from "./UnhashBehavior";
 
 const HEADER_SIZE = 64;
 const MAGIC_NUMBER = 0xB101; //45313
@@ -158,15 +159,16 @@ export class DsonData {
             }
             field.meta2EntryIdx = i;
             reader.seek(1, 1);
-            field.dataStartInFile = reader.offset
+            field.dataStartInFile = reader.offset;
+            field.dataOffRelToData = field.dataStartInFile - dson.header.dataOffset;
 
             let nextOff = dson.meta2Block.findNextSmallestOffset(meta2Entry.offset);
             let dataLen:number;
 
             if (nextOff > 0) {
-                dataLen = nextOff - (field.dataStartInFile - dson.header.dataOffset);
+                dataLen = nextOff - field.dataOffRelToData;
             } else {
-                dataLen = dson.header.dataLength - (field.dataStartInFile - dson.header.dataOffset); //accounts for dataStart being relative to begging of reader
+                dataLen = dson.header.dataLength - field.dataOffRelToData; //accounts for dataStart being relative to begging of reader
             }
 
             field.rawData = reader.readBytes(dataLen);
@@ -216,38 +218,6 @@ export class DsonData {
         return res;
     }
 }
-class DsonField {
-    name:string;
-    alignment:number;
-    meta1EntryIdx?:number;
-    meta2EntryIdx:number
-    dataStartInFile:number;
-    rawData:Uint8Array;
-    numChildren:number;
-    children:DsonField[];
-    type:any;
-
-    constructor(reader?:Reader) {
-        this.children = [];
-    }
-
-    setNumChildren(numChildren:number): void {
-        this.numChildren = numChildren;
-    }
-
-    addChild(child:DsonField): boolean {
-        this.children.push(child);
-        return true;
-    }
-
-    guessType(behavior:UnhashBehavior): boolean {
-
-    }
-
-    hashAllChildren(): boolean {
-        return this.children.length == this.numChildren;
-    }
-}
 
 export class Dson {
     header:DsonHeader;
@@ -265,6 +235,6 @@ export class Dson {
         this.meta2Block = new DsonMeta2Block(reader, this.header);
 
         reader.seek(this.header.dataOffset);
-        this.data = new DsonData(reader, this);
+        this.data = new DsonData(reader, this, UnhashBehavior.UNHASH);
     }
 }
