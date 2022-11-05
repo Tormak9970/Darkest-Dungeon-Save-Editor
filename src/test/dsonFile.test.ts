@@ -21,7 +21,7 @@ import path from "path";
 import { DsonToJsonController } from "../lib/controllers/DsonToJson";
 
 describe("Test Suite for DsonFile class", () => {
-    const jsonController = new DsonToJsonController(path.join(__dirname, "test-resources", "persist.estate.json"), path.join(__dirname, "test-resources", "output.json"));
+    // const jsonController = new DsonToJsonController(path.join(__dirname, "test-resources", "persist.estate.json"), path.join(__dirname, "test-resources", "output.json"));
     
 
     test("Header Tests", () => {
