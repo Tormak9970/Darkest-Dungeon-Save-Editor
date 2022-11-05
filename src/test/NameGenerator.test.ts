@@ -15,16 +15,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>
  */
+import fs from "fs";
+import path from "path";
+import { describe, test, expect} from "vitest";
+import { NameGenerator } from "../lib/utils/NameGenerator";
 
- import { describe, test, expect} from "vitest";
- import { NameGenerator } from "../lib/utils/NameGenerator";
- 
- describe("Test Suite for NameGenerator class", () => {
+describe("Test Suite for NameGenerator class", () => {
     const testGenerator = new NameGenerator();
- 
+
     test("findNames Tests", () => {
         const names = testGenerator.findNames(["C:\\Program Files (x86)\\Steam\\steamapps\\common\\DarkestDungeon"]);
+        // fs.writeFileSync(path.join(__dirname, "test-resources", "names_output.txt"), Array.from(names.values()).join('\n'));
 
-        expect(names.size).toBeGreaterThan(0);
+        expect(names.size).toEqual(2120);
     });
- });
+});

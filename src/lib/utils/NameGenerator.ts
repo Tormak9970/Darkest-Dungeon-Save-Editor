@@ -31,7 +31,7 @@ function readDirRecursive(dirPath:string, arrayOfFiles:string[] = []) {
     });
   
     return arrayOfFiles;
-  }
+}
 
 interface Parser {
     parseFile(path:string, names:Set<string>): void;
@@ -56,10 +56,12 @@ export class NameGenerator {
 				NameGenerator.addBaseName(fPath, names);
 				const ids = new Set<string>();
 				NameGenerator.addSimpleJSONArrayEntryIDs(buf, "trees", "id", ids);
-				for (const id of ids) {
+				const idsArr = Array.from(ids);
+				for (let i = 0; i < idsArr.length; i++) {
+					const id = idsArr[i];
 					names.add(id);
 					// For backer file, strip class name
-					const splits = id.split("\\.");
+					const splits = id.split("\.");
 					if (splits.length == 2) {
 						names.add(splits[1]);
 					}
@@ -75,7 +77,7 @@ export class NameGenerator {
         this.addParser(".camping_skills.json", {
 			parseFile(fPath:string, names:Set<string>) {
                 const buf = fs.readFileSync(fPath);
-				const json = buf.toJSON();
+				const json = JSON.parse(buf.toString());
 		        const arrArray:any[] = json["skills"];
 				if (arrArray != null) {
 					for (let i = 0; i < arrArray.length; i++) {
@@ -121,15 +123,21 @@ export class NameGenerator {
 			parseFile(fPath:string, names:Set<string>) {
                 NameGenerator.addBaseName(fPath, names);
                 const buf = fs.readFileSync(fPath);
-				const json = buf.toJSON();
-				const dataObject = json["data"];
-				if (dataObject != null) {
-					const activitiesArray = dataObject["activities"];
-					if (activitiesArray != null) {
-						for (const elem of activitiesArray) {
-							names.add(elem["id"]);
+				
+				try {
+					const json = JSON.parse(buf.toString());
+					const dataObject = json["data"];
+					if (dataObject != null) {
+						const activitiesArray = dataObject["activities"];
+						if (activitiesArray != null) {
+							for (let i = 0; i < activitiesArray.length; i++) {
+								const elem = activitiesArray[i];
+								names.add(elem["id"]);
+							}
 						}
 					}
+				} catch (e: any) {
+					console.log(e);
 				}
 			}
 		});
@@ -147,14 +155,15 @@ export class NameGenerator {
         const inventoryParser:Parser = {
             parseFile(fPath:string, names:Set<string>) {
 				// split lines
-				const lines = fs.readFileSync(fPath, { encoding: 'utf-8' }).split("\\r?\\n");
-				for (const str of lines) {
+				const lines = fs.readFileSync(fPath, { encoding: 'utf-8' }).split("\r\n");
+				for (let i = 0; i < lines.length; i++) {
+					const str = lines[i];
 					const matches = str.match(invRegex);
 					if (matches) {
 						// 0 is the entire matched string
-						for (let i = 1; i <= matches.length; i++) {
+						for (let i = 1; i < matches.length; i++) {
 							const group = matches[i];
-							if (group != "" && group) {
+							if (group != "") {
 								names.add(group);
 							}
 						}
@@ -180,10 +189,11 @@ export class NameGenerator {
         this.addParser("curio_props.csv", {
 			parseFile(fPath:string, names:Set<string>) {
                 // csv file -- just read the first column
-				const lines = fs.readFileSync(fPath, { encoding: 'utf-8' }).split("\\r?\\n");
-				for (const str of lines) {
+				const lines = fs.readFileSync(fPath, { encoding: 'utf-8' }).split("\r\n");
+				for (let i = 0; i < lines.length; i++) {
+					const str = lines[i];
 					const propName = str.substring(0, str.indexOf(","));
-					if (propName != "" && propName) {
+					if (propName != "") {
 						names.add(propName);
 					}
 				}
@@ -207,7 +217,7 @@ export class NameGenerator {
 		});
 
 		// Tutorial event 
-        this.addParser("", {
+        this.addParser(".png", {
 			parseFile(fPath:string, names:Set<string>) {
                 const tutRegex = new RegExp(".*tutorial_popup\\.([a-z_]*)\\.png");
 				const matches = fPath.match(tutRegex);
@@ -251,13 +261,17 @@ export class NameGenerator {
 	}
 
     static addSimpleJSONArrayEntryIDs(data:Buffer, arrayName:string, idString:string, set:Set<string>) {
-		const json = data.toJSON();
-		const arrArray:any[] = json[arrayName];
-		if (arrArray != null) {
-			for (let i = 0; i < arrArray.length; i++) {
-				const id = arrArray[i][idString];
-				set.add(id);
+		try {
+			const json = JSON.parse(data.toString());
+			const arrArray:any[] = json[arrayName];
+			if (arrArray != null) {
+				for (let i = 0; i < arrArray.length; i++) {
+					const id = arrArray[i][idString];
+					set.add(id);
+				}
 			}
+		} catch (e: any) {
+			console.log(e)
 		}
 	}
 
