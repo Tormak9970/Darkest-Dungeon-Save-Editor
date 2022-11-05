@@ -5,8 +5,15 @@
     import Button from "./components/Button.svelte";
     import Checkbox from "./components/Checkbox.svelte";
     import InputField from "./components/InputField.svelte";
+    import JsonEditor from "./components/JsonEditor.svelte";
+    import Pane from "./components/Pane.svelte";
+    import Tabs from "./components/tabs/Tabs.svelte";
 	import Titlebar from "./components/Titlebar.svelte";
     import Spacer from "./components/utils/Spacer.svelte";
+
+    $: tabs = [
+
+    ]
 
     async function loadSave() {
         const docsDir = await path.documentDir();
@@ -21,8 +28,6 @@
                 if (saveFilePath) {
                     const dat = await fs.readBinaryFile(saveFilePath);
                     
-
-                    console.log(save);
                 }
             }
         });
@@ -35,6 +40,10 @@
     function inputHandler(e:Event, fieldName:string) {
         
     }
+
+    function onButtonClick(e:Event) {
+
+    }
 </script>
 
 <div class="wrap">
@@ -43,7 +52,13 @@
 <main>
 	<Titlebar />
 	<div class="content">
-        
+        <Pane title="Paths">
+            <InputField fieldName="Save Directory" width={200} cVal={"Temp"} handler={inputHandler} />
+            <Button text="Test" onClick={onButtonClick} />
+        </Pane>
+        <Pane title="Save Data" fillParent>
+            <Tabs tabs={tabs} />
+        </Pane>
 	</div>
 </main>
 <SvelteToast />
@@ -82,10 +97,9 @@
     }
 
     .content {
+        margin-top: 5px;
         width: 100%;
-        height: calc(100% - 30px);
-
-        padding: 14px;
+        height: calc(100% - 35px);
 
         display: flex;
         flex-direction: column;

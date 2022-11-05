@@ -62,6 +62,7 @@
         user-select: none;
         display: inline-flex;
         justify-content: space-between;
+        font-size: 14px;
     }
     .info {
         display: flex;

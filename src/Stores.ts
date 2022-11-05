@@ -1,3 +1,8 @@
 import { writable } from "svelte/store";
+import type { Writable } from "svelte/store";
 
-export const saveFilePath = writable("");
+export const appDataDir = writable("");
+export const saveDirPath = writable("");
+
+export const tabs:Writable<{}> = writable({});
+export const selectedTab = writable("");

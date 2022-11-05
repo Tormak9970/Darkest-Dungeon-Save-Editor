@@ -13,10 +13,10 @@
     @import "/theme.css";
 
     .button {
-        padding: 4px 8px;
+        padding: 3px 6px;
         min-width: 40px;
         
-        background-color: var(--foreground);
+        background-color: var(--background);
         border: 1px solid #000;
         border-radius: 1px;
 
@@ -24,12 +24,12 @@
         align-items: center;
         justify-content: center;
 
-        font-size: 14px;
+        font-size: 12px;
         cursor: pointer;
     }
 
     .button:hover {
-        background-color: var(--hover);
+        background-color: var(--background-hover);
     }
 
     .button:focus {

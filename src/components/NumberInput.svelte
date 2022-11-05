@@ -1,18 +1,30 @@
 <script lang="ts">
     export let fieldName:string;
-    export let cVal:string;
-    export let width:number = 140;
+    export let cVal:number;
     export let handler:(e:Event, fieldName:string)=>void;
+
+    let value = "";
 
     async function wrapper(e:Event) {
         handler(e, fieldName.toLowerCase());
     }
+
+    function isNumber(value:any) { return !isNaN(value); }
+
+    function handleInput(e:Event) {
+        let oldValue = value;
+        let newValue = (e.target as HTMLInputElement).value;
+
+        if (isNumber(newValue)) {
+            value = newValue;
+        } else {
+            (e.target as HTMLInputElement).value = oldValue;
+        }
+    }
 </script>
 
 <div class="input">
-    <!-- svelte-ignore a11y-label-has-associated-control -->
-    <label style="margin-right: 13px; font-size: 14px">{fieldName}:</label>
-    <input style="width: {width}px;" type="text" placeholder="{cVal}" value="{cVal}" on:change="{wrapper}">
+    <input type="text" placeholder="{cVal.toString()}" value="{cVal}" on:change="{wrapper}" on:input={handleInput}>
 </div>
 
 <!-- svelte-ignore css-unused-selector -->
@@ -27,7 +39,6 @@
 		align-items: center;
 
 		color: var(--font-color);
-
         font-size: 12px;
 	}
 	.input > .field-name { margin-right: 10px; }
@@ -39,6 +50,7 @@
         outline: none;
         border: 1px solid black;
         padding: 3px;
+        max-width: 140px;
     }
     .input > input:hover {
         background-color: var(--background-hover);
