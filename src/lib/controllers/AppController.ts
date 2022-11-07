@@ -98,7 +98,6 @@ export class AppController {
         await fs.writeTextFile(fileNamesFilePath, Array.from(names).join('\n'));
 
         DsonTypes.offerNames(Array.from(names));
-        console.log(names)
     }
 
     static async updateNames(): Promise<void> {

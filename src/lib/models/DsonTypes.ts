@@ -1,9 +1,5 @@
 import { Utils } from "../utils/Utils";
-import type { Itterator, ItteratorGenerator } from "./DsonField";
-
-const typeEnum = {
-    
-}
+import type { ItteratorGenerator } from "./DsonField";
 
 export class FieldType {
     static TYPE_OBJECT = 0; // has a Meta1Block entry
