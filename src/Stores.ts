@@ -2,6 +2,7 @@ import { writable } from "svelte/store";
 import type { Writable } from "svelte/store";
 
 export const appDataDir = writable("");
+export const fileNamesPath = writable("");
 export const saveDirPath = writable("");
 export const gameDataDirPath = writable("");
 export const modDataDirPath = writable("");

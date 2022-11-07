@@ -96,7 +96,7 @@ export class DsonTypes {
         }
     }
 
-    // ! this may have issues, no sure
+    // ! this may have issues, not sure
     static isA(type:any, nameIter:{hasNext:()=>boolean, next:()=>string}): boolean {
         const arr = FieldType.names;
 

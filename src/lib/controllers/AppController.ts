@@ -22,6 +22,7 @@ import { appDataDir, dsonFiles, saveDirPath, tabs } from "../../Stores";
 import { DsonFile } from "../models/DsonFile";
 import { UnhashBehavior } from "../models/UnhashBehavior";
 import { Reader } from "../utils/Reader";
+import { Utils } from "../utils/Utils";
 import { GenerateNamesController } from "./GenerateNamesController";
 
 export class AppController {
@@ -29,7 +30,9 @@ export class AppController {
 
     static async init() {
         const appDir = get(appDataDir);
-        await fs.createDir(await path.join(appDir, "backups"));
+        const backupPath = await path.join(appDir, "backups");
+        // @ts-ignore
+        if (!(await fs.exists( backupPath))) await fs.createDir(await path.join(appDir, "backups"));
 
         // TODO show toast prompting user to load gameData dir
         // toast.push("");
@@ -52,12 +55,14 @@ export class AppController {
             for (let i = 0; i < saveConts.length; i++) {
                 const saveFilePath = saveConts[i];
                 // const saveFile = await path.join(saveDir, saveFilePath); //! may need this if .path doesnt work
-                const data = await fs.readBinaryFile(saveFilePath.path);
-                const reader = new Reader(data);
-                const dson = new DsonFile(reader, UnhashBehavior.POUNDUNHASH);
+                if (Utils.isSaveFile(saveFilePath.name)) {
+                    const data = await fs.readBinaryFile(saveFilePath.path);
+                    const reader = new Reader(data);
+                    const dson = new DsonFile(reader, UnhashBehavior.POUNDUNHASH);
 
-                newTabs[saveFilePath.name] = dson.asJson();
-                newDsonFiles[saveFilePath.name] = dson;
+                    newTabs[saveFilePath.name] = dson.asJson();
+                    newDsonFiles[saveFilePath.name] = dson;
+                }
             }
         }
 
@@ -87,6 +92,6 @@ export class AppController {
         const names = await AppController.namesController.generateNames(gamePath, modPath);
         // TODO need to show progress bar as this happens
 
-        // write to file in appDir
+        // TODO write to file in appDir
     }
 }

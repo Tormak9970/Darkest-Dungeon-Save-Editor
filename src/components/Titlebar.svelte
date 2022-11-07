@@ -1,10 +1,11 @@
 <script lang="ts">
     import { fs, path } from "@tauri-apps/api";
     import { appWindow } from '@tauri-apps/api/window';
+    import { toast } from "@zerodevx/svelte-toast";
     import { afterUpdate, onMount } from 'svelte';
     import { AppController } from "../lib/controllers/AppController";
     import { SettingsManager } from "../lib/utils/SettingsManager";
-    import { appDataDir, gameDataDirPath, modDataDirPath, saveDirPath, selectedTab } from "../Stores";
+    import { appDataDir, fileNamesPath, gameDataDirPath, modDataDirPath, saveDirPath, selectedTab } from "../Stores";
 
     let minimize:HTMLDivElement;
     let maximize:HTMLDivElement;
@@ -24,6 +25,7 @@
 		let settings:AppSettings = JSON.parse(await fs.readTextFile(SettingsManager.settingsPath));
 		
         $appDataDir = settings.appDataDir == "" ? (await path.appDir()) : settings.appDataDir;
+        $fileNamesPath = await path.join($appDataDir, "filenames.txt");
         $saveDirPath = settings.saveDir;
         $gameDataDirPath = settings.gameDataDir;
         $modDataDirPath = settings.modDataDir;
@@ -56,7 +58,16 @@
         await AppController.init();
         
         if ($saveDirPath != "") {
-            await AppController.loadSave();
+            if ($gameDataDirPath == "") {
+                // TODO show toast to prompt user to choose directory
+                toast.push("Select a game data path")
+            } else {
+                // @ts-ignore
+                if (!(await fs.exists($fileNamesPath)) && $gameDataDirPath != "") {
+                    await AppController.generateNames($gameDataDirPath, $modDataDirPath);
+                }
+                await AppController.loadSave();
+            }
         }
     });
 

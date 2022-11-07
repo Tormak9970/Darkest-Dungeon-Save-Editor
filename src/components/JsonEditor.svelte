@@ -16,7 +16,7 @@
 
     onMount(() => {
         const state = EditorState.create({
-            doc: JSON.stringify({ "message": "Open a Save File" }, null, 2),
+            doc: JSON.stringify({ "message": "Select paths or choose a save file" }, null, 2),
             extensions: [
                 lineNumbers(),
                 highlightActiveLineGutter(),

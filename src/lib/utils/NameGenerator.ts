@@ -15,26 +15,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>
  */
-import fs from "fs";
-import path from "path";
 
-function readDirRecursive(dirPath:string, arrayOfFiles:string[] = []) {
-    const files = fs.readdirSync(dirPath);
-  
-    files.forEach(function(file) {
-        const newPath = path.join(dirPath, file);
-        if (fs.statSync(newPath).isDirectory()) {
-            arrayOfFiles = readDirRecursive(newPath, arrayOfFiles);
-        } else {
-            arrayOfFiles.push(newPath);
-        }
-    });
-  
-    return arrayOfFiles;
-}
+import { fs, path } from "@tauri-apps/api";
 
 interface Parser {
-    parseFile(path:string, names:Set<string>): void;
+    parseFile(path:string, names:Set<string>): Promise<void>;
 }
 
 export class NameGenerator {
@@ -44,18 +29,18 @@ export class NameGenerator {
     constructor() {
         // Info files (Heroes, Monsters)
 		this.addParser(".info.darkest", {
-            parseFile(fPath:string, names:Set<string>) {
-				NameGenerator.addBaseName(fPath, names);
+            async parseFile(fPath:string, names:Set<string>) {
+				await NameGenerator.addBaseName(fPath, names);
 			}
         });
 
 		// Upgrades
         this.addParser(".upgrades.json", {
-			parseFile(fPath:string, names:Set<string>) {
-                const buf = fs.readFileSync(fPath);
-				NameGenerator.addBaseName(fPath, names);
+			async parseFile(fPath:string, names:Set<string>) {
+                const buf = await fs.readBinaryFile(fPath);
+				await NameGenerator.addBaseName(fPath, names);
 				const ids = new Set<string>();
-				NameGenerator.addSimpleJSONArrayEntryIDs(buf, "trees", "id", ids);
+				NameGenerator.addSimpleJSONArrayEntryIDs(Buffer.from(buf), "trees", "id", ids);
 				const idsArr = Array.from(ids);
 				for (let i = 0; i < idsArr.length; i++) {
 					const id = idsArr[i];
@@ -75,8 +60,8 @@ export class NameGenerator {
 		// the actual saved hashed tree name is "soldierclass.skill", even though skills may be shared
 		// (Though the backer file has the skills in pure form???)
         this.addParser(".camping_skills.json", {
-			parseFile(fPath:string, names:Set<string>) {
-                const buf = fs.readFileSync(fPath);
+			async parseFile(fPath:string, names:Set<string>) {
+                const buf = await fs.readBinaryFile(fPath);
 				const json = JSON.parse(buf.toString());
 		        const arrArray:any[] = json["skills"];
 				if (arrArray != null) {
@@ -96,15 +81,15 @@ export class NameGenerator {
 
 		// Dungeon types
         this.addParser(".dungeon.json", {
-			parseFile(fPath:string, names:Set<string>) {
-                NameGenerator.addBaseName(fPath, names);
+			async parseFile(fPath:string, names:Set<string>) {
+                await NameGenerator.addBaseName(fPath, names);
 			}
 		});
 
 		// Quest types
         this.addParser(".types.json", {
-			parseFile(fPath:string, names:Set<string>) {
-                const buf = fs.readFileSync(fPath);
+			async parseFile(fPath:string, names:Set<string>) {
+                const buf = Buffer.from(await fs.readBinaryFile(fPath));
                 NameGenerator.addSimpleJSONArrayEntryIDs(buf, "types", "id", names);
 				NameGenerator.addSimpleJSONArrayEntryIDs(buf, "goals", "id", names);
 			}
@@ -112,17 +97,17 @@ export class NameGenerator {
 
 		// Quirks
         this.addParser("quirk_library.json", {
-			parseFile(fPath:string, names:Set<string>) {
-                const buf = fs.readFileSync(fPath);
+			async parseFile(fPath:string, names:Set<string>) {
+                const buf = Buffer.from(await fs.readBinaryFile(fPath));
                 NameGenerator.addSimpleJSONArrayEntryIDs(buf, "quirks", "id", names);
 			}
 		});
 
 		// Buildings and activities
         this.addParser(".building.json", {
-			parseFile(fPath:string, names:Set<string>) {
-                NameGenerator.addBaseName(fPath, names);
-                const buf = fs.readFileSync(fPath);
+			async parseFile(fPath:string, names:Set<string>) {
+                await NameGenerator.addBaseName(fPath, names);
+                const buf = Buffer.from(await fs.readBinaryFile(fPath));
 				
 				try {
 					const json = JSON.parse(buf.toString());
@@ -144,18 +129,18 @@ export class NameGenerator {
 
 		// Town events 
         this.addParser(".events.json", {
-			parseFile(fPath:string, names:Set<string>) {
-                const buf = fs.readFileSync(fPath);
-                NameGenerator.addBaseName(fPath, names);
+			async parseFile(fPath:string, names:Set<string>) {
+                const buf = Buffer.from(await fs.readBinaryFile(fPath));
+                await NameGenerator.addBaseName(fPath, names);
                 NameGenerator.addSimpleJSONArrayEntryIDs(buf, "events", "id", names)
 			}
 		});
 
         const invRegex = new RegExp("inventory_item:\\s?\\.type\\s?\"([a-z_]*)\"\\s*\\.id\\s*\"([a-z_]*)\".*");
         const inventoryParser:Parser = {
-            parseFile(fPath:string, names:Set<string>) {
+            async parseFile(fPath:string, names:Set<string>) {
 				// split lines
-				const lines = fs.readFileSync(fPath, { encoding: 'utf-8' }).split("\r\n");
+				const lines = (await fs.readTextFile(fPath)).split("\r\n");
 				for (let i = 0; i < lines.length; i++) {
 					const str = lines[i];
 					const matches = str.match(invRegex);
@@ -178,8 +163,8 @@ export class NameGenerator {
 
 		// Town events 
         this.addParser(".trinkets.json", {
-			parseFile(fPath:string, names:Set<string>) {
-                const buf = fs.readFileSync(fPath);
+			async parseFile(fPath:string, names:Set<string>) {
+                const buf = Buffer.from(await fs.readBinaryFile(fPath));
                 NameGenerator.addSimpleJSONArrayEntryIDs(buf, "entries", "id", names);
 			}
 		});
@@ -187,9 +172,9 @@ export class NameGenerator {
 		// Curios
 		// TODO: Some Quest curios aren't caught. Need to find where they're defined
         this.addParser("curio_props.csv", {
-			parseFile(fPath:string, names:Set<string>) {
+			async parseFile(fPath:string, names:Set<string>) {
                 // csv file -- just read the first column
-				const lines = fs.readFileSync(fPath, { encoding: 'utf-8' }).split("\r\n");
+				const lines = (await fs.readTextFile(fPath)).split("\r\n");
 				for (let i = 0; i < lines.length; i++) {
 					const str = lines[i];
 					const propName = str.substring(0, str.indexOf(","));
@@ -202,23 +187,23 @@ export class NameGenerator {
 
 		// Obstacles 
         this.addParser("obstacle_definitions.json", {
-			parseFile(fPath:string, names:Set<string>) {
-                const buf = fs.readFileSync(fPath);
+			async parseFile(fPath:string, names:Set<string>) {
+                const buf = Buffer.from(await fs.readBinaryFile(fPath));
                 NameGenerator.addSimpleJSONArrayEntryIDs(buf, "props", "name", names);
 			}
 		});
 
 		// Obstacles 
         this.addParser("quest.plot_quests.json", {
-			parseFile(fPath:string, names:Set<string>) {
-                const buf = fs.readFileSync(fPath);
+			async parseFile(fPath:string, names:Set<string>) {
+                const buf = Buffer.from(await fs.readBinaryFile(fPath));
                 NameGenerator.addSimpleJSONArrayEntryIDs(buf, "plot_quests", "id", names);
 			}
 		});
 
 		// Tutorial event 
         this.addParser(".png", {
-			parseFile(fPath:string, names:Set<string>) {
+			async parseFile(fPath:string, names:Set<string>) {
                 const tutRegex = new RegExp(".*tutorial_popup\\.([a-z_]*)\\.png");
 				const matches = fPath.match(tutRegex);
                 if (matches) {
@@ -252,8 +237,8 @@ export class NameGenerator {
         if (!parserList.includes(parser)) parserList.push(parser);
     }
 
-    static addBaseName(fPath:string, names:Set<string>) {
-		let fileName = path.basename(fPath);
+    static async addBaseName(fPath:string, names:Set<string>) {
+		let fileName = await path.basename(fPath);
 		if (fileName.indexOf(".") > 0) {
 			fileName = fileName.substring(0, fileName.indexOf("."));
 		}
@@ -275,21 +260,21 @@ export class NameGenerator {
 		}
 	}
 
-    findNames(gameDirs:string[]):Set<string> {
+    async findNames(gameDirs:string[]):Promise<Set<string>> {
         const names = new Set<string>();
 
         for (let i = 0; i < gameDirs.length; i++) {
             const dirPath = gameDirs[i];
-            const files = readDirRecursive(dirPath);
+            const files = await fs.readDir(dirPath, { recursive: true });
 
             if (files) {
                 for (let j = 0; j < files.length; j++) {
-                    const fileName = files[j];
+                    const fileName = files[j].name;
 
                     for (const parserSetKey of this.parsers.keys()) {
                         if (fileName.endsWith(parserSetKey)) {
                             for (const parser of this.parsers.get(parserSetKey)) {
-                                parser.parseFile(fileName, names);
+                                await parser.parseFile(fileName, names);
                             }
                         }
                     }
