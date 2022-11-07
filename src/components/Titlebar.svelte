@@ -3,7 +3,7 @@
     import { appWindow } from '@tauri-apps/api/window';
     import { afterUpdate, onMount } from 'svelte';
     import { SettingsManager } from "../lib/utils/SettingsManager";
-    import { appDataDir, gameDataDirPath, modDataDirPath, saveDirPath } from "../Stores";
+    import { appDataDir, gameDataDirPath, modDataDirPath, saveDirPath, selectedTab } from "../Stores";
 
     let minimize:HTMLDivElement;
     let maximize:HTMLDivElement;
@@ -35,6 +35,12 @@
         modDataDirPath.subscribe(async (newVal:string) => {
             await SettingsManager.updateSettings({
                 prop: "modDataDir",
+                data: newVal
+            });
+        });
+        selectedTab.subscribe(async (newVal:string) => {
+            await SettingsManager.updateSettings({
+                prop: "selectedTab",
                 data: newVal
             });
         });
