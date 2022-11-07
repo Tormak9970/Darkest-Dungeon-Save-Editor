@@ -293,4 +293,8 @@ export class DsonField {
 
         return itterator;
     }
+
+    asJson() {
+        // TODO implement
+    }
 }

@@ -220,7 +220,7 @@ export class DsonData {
     }
 
     asJson() {
-
+        return this.fields.map(field => field.asJson());
     }
 }
 

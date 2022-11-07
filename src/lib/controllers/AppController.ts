@@ -16,6 +16,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>
  */
 import { fs, path } from "@tauri-apps/api";
+import { toast } from "@zerodevx/svelte-toast";
 import { get,  } from "svelte/store";
 import { appDataDir, dsonFiles, saveDirPath, tabs } from "../../Stores";
 import { DsonFile } from "../models/DsonFile";
@@ -29,8 +30,15 @@ export class AppController {
     static async init() {
         const appDir = get(appDataDir);
         await fs.createDir(await path.join(appDir, "backups"));
-        // create backup dir in appData folder
-        // prompt user to entire game save location
+
+        // TODO show toast prompting user to load gameData dir
+        // toast.push("");
+
+        // TODO show toast prompting user to gen names if no cache present
+        // toast.push("");
+
+        // TODO show toast prompting user to load save dir
+        // toast.push("");
     }
 
     static async loadSave() {
