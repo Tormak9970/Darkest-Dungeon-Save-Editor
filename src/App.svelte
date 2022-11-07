@@ -70,7 +70,7 @@
             </div>
         </Pane>
         <Pane title="Save Data" fillParent>
-            <Tabs tabs={tabs} />
+            <Tabs />
         </Pane>
 	</div>
 </main>
