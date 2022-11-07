@@ -1,6 +1,9 @@
 <script lang="ts">
+    import { fs, path } from "@tauri-apps/api";
     import { appWindow } from '@tauri-apps/api/window';
     import { afterUpdate, onMount } from 'svelte';
+    import { SettingsManager } from "../lib/utils/SettingsManager";
+    import { appDataDir, gameDataDirPath, modDataDirPath, saveDirPath } from "../Stores";
 
     let minimize:HTMLDivElement;
     let maximize:HTMLDivElement;
@@ -9,6 +12,33 @@
     let isMaxed = false;
 
     onMount(async () => {
+        await SettingsManager.setSettingsPath();
+		let settings:AppSettings = JSON.parse(await fs.readTextFile(SettingsManager.settingsPath));
+		
+        $appDataDir = settings.appDataDir == "" ? (await path.appDir()) : settings.appDataDir;
+        $saveDirPath = settings.saveDir;
+        $gameDataDirPath = settings.gameDataDir;
+        $modDataDirPath = settings.modDataDir;
+
+        saveDirPath.subscribe(async (newVal:string) => {
+            await SettingsManager.updateSettings({
+                prop: "saveDir",
+                data: newVal
+            });
+        });
+        gameDataDirPath.subscribe(async (newVal:string) => {
+            await SettingsManager.updateSettings({
+                prop: "gameDataDir",
+                data: newVal
+            });
+        });
+        modDataDirPath.subscribe(async (newVal:string) => {
+            await SettingsManager.updateSettings({
+                prop: "modDataDir",
+                data: newVal
+            });
+        });
+
         minimize.addEventListener('click', () => appWindow.minimize());
         maximize.addEventListener('click', () => {
             appWindow.toggleMaximize();

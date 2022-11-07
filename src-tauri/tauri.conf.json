@@ -20,7 +20,8 @@
           "$APP/**",
           "$DESKTOP/**",
           "$DOCUMENT/**",
-          "$RESOURCE/**"
+          "$RESOURCE/**",
+          "$DATA/**"
         ]
       },
       "protocol": {
@@ -30,7 +31,8 @@
           "$APP/**",
           "$DESKTOP/**",
           "$DOCUMENT/**",
-          "$RESOURCE/**"
+          "$RESOURCE/**",
+          "$DATA/**"
         ]
       },
       "window": { "all": true }
@@ -51,7 +53,7 @@
         "providerShortName": null,
         "signingIdentity": null
       },
-      "resources": [],
+      "resources": ["../settings.json"],
       "shortDescription": "",
       "targets": "all",
       "windows": {
@@ -70,10 +72,10 @@
     "windows": [
       {
         "fullscreen": false,
-        "height": 530,
+        "height": 680,
         "resizable": true,
         "title": "DarkestDungeon Save Editor",
-        "width": 760,
+        "width": 950,
         "decorations": false,
         "center": true
       }

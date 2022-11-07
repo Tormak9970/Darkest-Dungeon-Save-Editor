@@ -3,37 +3,23 @@
     
 	import { SvelteToast } from "@zerodevx/svelte-toast";
     import Button from "./components/Button.svelte";
-    import Checkbox from "./components/Checkbox.svelte";
-    import InputField from "./components/InputField.svelte";
-    import JsonEditor from "./components/JsonEditor.svelte";
     import Pane from "./components/Pane.svelte";
+    import PathField from "./components/PathField.svelte";
     import Tabs from "./components/tabs/Tabs.svelte";
 	import Titlebar from "./components/Titlebar.svelte";
-    import Spacer from "./components/utils/Spacer.svelte";
+    
+    import { gameDataDirPath, modDataDirPath, saveDirPath } from "./Stores";
 
     $: tabs = [
 
     ]
 
-    async function loadSave() {
-        const docsDir = await path.documentDir();
-        const saveDirPath = await path.join(docsDir, "Saved Games", "Hades");
-        // @ts-ignore
-        const fPath = await fs.exists(saveDirPath) ? saveDirPath : "C:/";
-
-        await dialog.open({ directory: true, title: 'Select a save directory', multiple: false, defaultPath: fPath }).then(async (file) => {
-            if (file) {
-                const saveFilePath = file as string;
-                
-                if (saveFilePath) {
-                    const dat = await fs.readBinaryFile(saveFilePath);
-                    
-                }
-            }
-        });
+    async function loadSave(e:Event) {
+        const path = (e.currentTarget as HTMLInputElement).value;
+        $saveDirPath = path;
     }
 
-    async function saveChanges() {
+    async function saveChanges(e:Event) {
 
     }
 
@@ -41,7 +27,15 @@
         
     }
 
-    function onButtonClick(e:Event) {
+    function makeBackup(e:Event) {
+
+    }
+
+    function loadBackup(e:Event) {
+
+    }
+
+    function findNames(e:Event) {
 
     }
 </script>
@@ -53,8 +47,21 @@
 	<Titlebar />
 	<div class="content">
         <Pane title="Paths">
-            <InputField fieldName="Save Directory" width={200} cVal={"Temp"} handler={inputHandler} />
-            <Button text="Test" onClick={onButtonClick} />
+            <div class="row" style="margin-top: 0px;">
+                <PathField fieldName="Save Directory" title={"Select a save directory"} defaultPath={"documents"} cVal={$saveDirPath} handler={loadSave} />
+                <div style="height: 1px; width: 7px;" />
+                <Button text={"Make Backup"} onClick={makeBackup} width={"100px"} />
+            </div>
+            <div class="row">
+                <PathField fieldName="Game Data" title={"Select your game data directory"} defaultPath={""} cVal={$gameDataDirPath} handler={inputHandler} />
+                <div style="height: 1px; width: 7px;" />
+                <Button text={"Load Backup"} onClick={loadBackup} width={"100px"} />
+            </div>
+            <div class="row">
+                <PathField fieldName="Mod Data" title={"Select your mod data directory"} defaultPath={""}  cVal={$modDataDirPath} handler={inputHandler} />
+                <div style="height: 1px; width: 7px;" />
+                <Button text={"Find Names"} onClick={findNames} width={"100px"} />
+            </div>
         </Pane>
         <Pane title="Save Data" fillParent>
             <Tabs tabs={tabs} />
@@ -94,6 +101,13 @@
             --toastContainerLeft: calc(50vw - 20rem);
             --toastWidth: 40rem;
         }
+    }
+
+    .row {
+        margin-top: 7px;
+
+        display: flex;
+        align-items: center;
     }
 
     .content {
