@@ -67,12 +67,10 @@
             });
             view.dispatch(clearTransaction);
 
-            // view.state.doc.replace(0, view.state.doc.lines, "tmp");
-
             let updateTransaction = view.state.update({
                 changes: {
                     from: 0,
-                    insert: str !+ "" ? JSON.stringify($tabs[str], null, 2) : JSON.stringify({ "message": "Open a Save File" }, null, 2)
+                    insert: str !+ "" ? JSON.stringify($tabs[str], null, 2) : JSON.stringify({ "message": "Select paths or choose a save file" }, null, 2)
                 }
             });
 

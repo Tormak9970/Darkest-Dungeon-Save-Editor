@@ -279,22 +279,38 @@ export class DsonField {
     hasAllChildren(): boolean { return this.children.length == this.numChildren; }
 
     private nameIterator() {
-        let field = JSON.parse(JSON.stringify(this));
-        const itterator = {
-            hasNext():boolean {
-                return field != null;
-            },
-            next():string {
-                const f = field.name;
-                field = field.parent;
-                return f;
-            }
-        }
-
-        return itterator;
+        return new ItteratorGenerator(JSON.parse(JSON.stringify(this)));
     }
 
     asJson() {
         // TODO implement
+    }
+}
+
+export class ItteratorGenerator {
+    private field:DsonField;
+
+    constructor(field:DsonField) {
+        this.field = field;
+    }
+
+    get() {
+        return new Itterator(this.field);
+    }
+}
+
+export class Itterator {
+    private field:DsonField;
+
+    constructor(field:DsonField) {
+        this.field = field;
+    }
+    hasNext():boolean {
+        return this.field != null;
+    }
+    next():string {
+        const f = this.field.name;
+        this.field = this.field.parent ? this.field.parent : null;
+        return f;
     }
 }

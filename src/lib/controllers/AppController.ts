@@ -18,8 +18,9 @@
 import { fs, path } from "@tauri-apps/api";
 import { toast } from "@zerodevx/svelte-toast";
 import { get,  } from "svelte/store";
-import { appDataDir, dsonFiles, saveDirPath, tabs } from "../../Stores";
+import { appDataDir, dsonFiles, fileNamesPath, saveDirPath, tabs } from "../../Stores";
 import { DsonFile } from "../models/DsonFile";
+import { DsonTypes } from "../models/DsonTypes";
 import { UnhashBehavior } from "../models/UnhashBehavior";
 import { Reader } from "../utils/Reader";
 import { Utils } from "../utils/Utils";
@@ -89,9 +90,21 @@ export class AppController {
     }
 
     static async generateNames(gamePath:string, modPath:string): Promise<void> {
+        const fileNamesFilePath = get(fileNamesPath);
         const names = await AppController.namesController.generateNames(gamePath, modPath);
         // TODO need to show progress bar as this happens
 
         // TODO write to file in appDir
+        await fs.writeTextFile(fileNamesFilePath, Array.from(names).join('\n'));
+
+        DsonTypes.offerNames(Array.from(names));
+        console.log(names)
+    }
+
+    static async updateNames(): Promise<void> {
+        const fileNamesFilePath = get(fileNamesPath);
+        const names = (await fs.readTextFile(fileNamesFilePath)).split('\n');
+
+        DsonTypes.offerNames(Array.from(names));
     }
 }

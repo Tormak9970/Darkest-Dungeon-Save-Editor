@@ -65,6 +65,8 @@
                 // @ts-ignore
                 if (!(await fs.exists($fileNamesPath)) && $gameDataDirPath != "") {
                     await AppController.generateNames($gameDataDirPath, $modDataDirPath);
+                } else {
+                    await AppController.updateNames();
                 }
                 await AppController.loadSave();
             }

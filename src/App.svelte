@@ -37,8 +37,8 @@
 
     }
 
-    function findNames(e:Event) {
-        AppController.generateNames($gameDataDirPath, $modDataDirPath);
+    async function findNames(e:Event) {
+        await AppController.generateNames($gameDataDirPath, $modDataDirPath);
     }
 </script>
 
@@ -50,17 +50,17 @@
 	<div class="content">
         <Pane title="Paths">
             <div class="row" style="margin-top: 0px;">
-                <PathField fieldName="Save Directory" title={"Select a save directory"} defaultPath={""} cVal={$saveDirPath} handler={loadSave} />
+                <PathField fieldName="Save Directory" title={"Select a save directory"} defaultPath={$saveDirPath} cVal={$saveDirPath} handler={loadSave} />
                 <div style="height: 1px; width: 7px;" />
                 <Button text={"Make Backup"} onClick={makeBackup} width={"100px"} />
             </div>
             <div class="row">
-                <PathField fieldName="Game Data" title={"Select your game data directory"} defaultPath={""} cVal={$gameDataDirPath} handler={loadGameData} />
+                <PathField fieldName="Game Data" title={"Select your game data directory"} defaultPath={$gameDataDirPath} cVal={$gameDataDirPath} handler={loadGameData} />
                 <div style="height: 1px; width: 7px;" />
                 <Button text={"Load Backup"} onClick={loadBackup} width={"100px"} />
             </div>
             <div class="row">
-                <PathField fieldName="Mod Data" title={"Select your mod data directory"} defaultPath={""}  cVal={$modDataDirPath} handler={loadModData} />
+                <PathField fieldName="Mod Data" title={"Select your mod data directory"} defaultPath={$modDataDirPath}  cVal={$modDataDirPath} handler={loadModData} />
                 <div style="height: 1px; width: 7px;" />
                 <Button text={"Find Names"} onClick={findNames} width={"100px"} />
             </div>

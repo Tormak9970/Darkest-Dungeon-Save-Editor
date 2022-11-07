@@ -1,4 +1,5 @@
 import { Utils } from "../utils/Utils";
+import type { Itterator, ItteratorGenerator } from "./DsonField";
 
 const typeEnum = {
     
@@ -71,12 +72,6 @@ export class FieldType {
     // Unknown Type
     static TYPE_UNKNOWN = 12;
 
-    static names:string[][];
-
-    constructor(names?:string[][]) {
-        FieldType.names = names ? names : null;
-    }
-
     static getKeyName(type:any): string {
         return Object.keys(this).find(key => this[key] == type);
     }
@@ -97,10 +92,10 @@ export class DsonTypes {
     }
 
     // ! this may have issues, not sure
-    static isA(type:any, nameIter:{hasNext:()=>boolean, next:()=>string}): boolean {
-        const arr = FieldType.names;
+    static isA(type:any, nameGen:ItteratorGenerator): boolean {
+        const arr = type;
 
-        if (arr == null) {
+        if (!Array.isArray(arr)) {
             throw new Error("Not a hardcoded type: " + type);
         }
 
@@ -109,6 +104,7 @@ export class DsonTypes {
 
         for (let i = 0; i < arr.length; i++) {
             match = true;
+            const nameIter = nameGen.get();
             checkString = nameIter.next();
 
             for (let j = arr[i].length - 1; j >= 0; j--) {
