@@ -218,6 +218,10 @@ export class DsonData {
         const res = decoder.decode(reader.readBytes(nameLength));
         return res;
     }
+
+    asJson() {
+
+    }
 }
 
 export class DsonFile {
@@ -237,5 +241,9 @@ export class DsonFile {
 
         reader.seek(this.header.dataOffset);
         this.data = new DsonData(reader, this, behavior);
+    }
+
+    asJson() {
+        return this.data.asJson();
     }
 }

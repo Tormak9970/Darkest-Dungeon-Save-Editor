@@ -43,7 +43,7 @@ export class DsonField {
     numChildren:number;
     children:DsonField[];
 
-    constructor(reader?:Reader) {
+    constructor() {
         this.children = [];
     }
 

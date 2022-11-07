@@ -16,61 +16,69 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>
  */
 import { fs, path } from "@tauri-apps/api";
-import { NameGenerator } from "../utils/NameGenerator";
+import { get,  } from "svelte/store";
+import { appDataDir, dsonFiles, saveDirPath, tabs } from "../../Stores";
+import { DsonFile } from "../models/DsonFile";
+import { UnhashBehavior } from "../models/UnhashBehavior";
+import { Reader } from "../utils/Reader";
+import { GenerateNamesController } from "./GenerateNamesController";
 
 export class AppController {
-    private static DDSteamDir = "262060";
-    nameGenerator:NameGenerator;
+    static namesController = new GenerateNamesController();
 
-    constructor() {
-        this.nameGenerator = new NameGenerator();
-    }
-
-    init() {
+    static async init() {
+        const appDir = get(appDataDir);
+        await fs.createDir(await path.join(appDir, "backups"));
         // create backup dir in appData folder
         // prompt user to entire game save location
     }
 
-    async loadSave() {
+    static async loadSave() {
+        const saveDir = get(saveDirPath);
 
-    }
+        const newTabs = {};
+        const newDsonFiles = {};
+        if (saveDir != "") {
+            const saveConts = await fs.readDir(saveDir);
 
-    async backup() {
-        
-    }
+            for (let i = 0; i < saveConts.length; i++) {
+                const saveFilePath = saveConts[i];
+                // const saveFile = await path.join(saveDir, saveFilePath); //! may need this if .path doesnt work
+                const data = await fs.readBinaryFile(saveFilePath.path);
+                const reader = new Reader(data);
+                const dson = new DsonFile(reader, UnhashBehavior.POUNDUNHASH);
 
-    async saveChanges() {
-
-    }
-
-    async discardChanges() {
-        
-    }
-
-    async reload() {
-
-    }
-
-    async generateNames(gamePath:string, modPath:string): Promise<Set<string>> {
-        const paths = []
-        if (gamePath != "") {
-            const revisionsPath = await path.join(gamePath, "svn_revision.txt")
-            if (fs.exists(revisionsPath)) {
-                paths.push(gamePath);
-            } else {
-                throw new Error("Expected game path to point to game data, but missing svn_revision.txt");
+                newTabs[saveFilePath.name] = dson.asJson();
+                newDsonFiles[saveFilePath.name] = dson;
             }
         }
 
-        if (modPath != "") {
-            if (modPath.includes(AppController.DDSteamDir)) {
-                paths.push(modPath);
-            } else {
-                throw new Error("Expected mod path to include game dir (262060)");
-            }
-        }
+        tabs.set(newTabs);
+        dsonFiles.set(newDsonFiles);
 
-        const names = this.nameGenerator.findNames(paths);
-        return names;
+        console.log(newTabs);
+    }
+
+    static async backup() {
+        
+    }
+
+    static async saveChanges() {
+
+    }
+
+    static async discardChanges() {
+        
+    }
+
+    static async reload() {
+
+    }
+
+    static async generateNames(gamePath:string, modPath:string): Promise<void> {
+        const names = await AppController.namesController.generateNames(gamePath, modPath);
+        // TODO need to show progress bar as this happens
+
+        // write to file in appDir
     }
 }

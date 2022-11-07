@@ -1,22 +1,18 @@
 <script lang="ts">
-    import { dialog, fs, path } from "@tauri-apps/api";
-    
 	import { SvelteToast } from "@zerodevx/svelte-toast";
-    import Button from "./components/Button.svelte";
-    import Pane from "./components/Pane.svelte";
-    import PathField from "./components/PathField.svelte";
+    import Button from "./components/interactable/Button.svelte";
+    import Pane from "./components/layout/Pane.svelte";
+    import PathField from "./components/interactable/PathField.svelte";
     import Tabs from "./components/tabs/Tabs.svelte";
 	import Titlebar from "./components/Titlebar.svelte";
+    import { AppController } from "./lib/controllers/AppController";
     
     import { gameDataDirPath, modDataDirPath, saveDirPath } from "./Stores";
-
-    $: tabs = [
-
-    ]
 
     async function loadSave(e:Event) {
         const path = (e.currentTarget as HTMLInputElement).value;
         $saveDirPath = path;
+        await AppController.loadSave();
     }
 
     async function loadGameData(e:Event) {
@@ -42,7 +38,7 @@
     }
 
     function findNames(e:Event) {
-
+        AppController.generateNames($gameDataDirPath, $modDataDirPath);
     }
 </script>
 
@@ -54,7 +50,7 @@
 	<div class="content">
         <Pane title="Paths">
             <div class="row" style="margin-top: 0px;">
-                <PathField fieldName="Save Directory" title={"Select a save directory"} defaultPath={"documents"} cVal={$saveDirPath} handler={loadSave} />
+                <PathField fieldName="Save Directory" title={"Select a save directory"} defaultPath={""} cVal={$saveDirPath} handler={loadSave} />
                 <div style="height: 1px; width: 7px;" />
                 <Button text={"Make Backup"} onClick={makeBackup} width={"100px"} />
             </div>

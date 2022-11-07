@@ -2,6 +2,7 @@
     import { fs, path } from "@tauri-apps/api";
     import { appWindow } from '@tauri-apps/api/window';
     import { afterUpdate, onMount } from 'svelte';
+    import { AppController } from "../lib/controllers/AppController";
     import { SettingsManager } from "../lib/utils/SettingsManager";
     import { appDataDir, gameDataDirPath, modDataDirPath, saveDirPath, selectedTab } from "../Stores";
 
@@ -12,6 +13,13 @@
     let isMaxed = false;
 
     onMount(async () => {
+        minimize.addEventListener('click', () => appWindow.minimize());
+        maximize.addEventListener('click', () => {
+            appWindow.toggleMaximize();
+            isMaxed = !isMaxed;
+        });
+        close.addEventListener('click', () => appWindow.close());
+
         await SettingsManager.setSettingsPath();
 		let settings:AppSettings = JSON.parse(await fs.readTextFile(SettingsManager.settingsPath));
 		
@@ -45,12 +53,11 @@
             });
         });
 
-        minimize.addEventListener('click', () => appWindow.minimize());
-        maximize.addEventListener('click', () => {
-            appWindow.toggleMaximize();
-            isMaxed = !isMaxed;
-        });
-        close.addEventListener('click', () => appWindow.close());
+        await AppController.init();
+        
+        if ($saveDirPath != "") {
+            await AppController.loadSave();
+        }
     });
 
     afterUpdate(async () => {
