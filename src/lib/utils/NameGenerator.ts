@@ -17,9 +17,23 @@
  */
 
 import { fs, path } from "@tauri-apps/api";
+import { Buffer } from "buffer"
 
 interface Parser {
     parseFile(path:string, names:Set<string>): Promise<void>;
+}
+
+function recursiveFlatten(files:fs.FileEntry[], res:string[] = []): string[] {
+	for (let i = 0; i < files.length; i++) {
+		const file = files[i];
+		if (file.children) {
+			res = recursiveFlatten(file.children, res);
+		} else {
+			res.push(file.path)
+		}
+	}
+
+	return res;
 }
 
 export class NameGenerator {
@@ -40,7 +54,7 @@ export class NameGenerator {
                 const buf = await fs.readBinaryFile(fPath);
 				await NameGenerator.addBaseName(fPath, names);
 				const ids = new Set<string>();
-				NameGenerator.addSimpleJSONArrayEntryIDs(Buffer.from(buf), "trees", "id", ids);
+				NameGenerator.addSimpleJSONArrayEntryIDs(buf, "trees", "id", ids);
 				const idsArr = Array.from(ids);
 				for (let i = 0; i < idsArr.length; i++) {
 					const id = idsArr[i];
@@ -61,7 +75,7 @@ export class NameGenerator {
 		// (Though the backer file has the skills in pure form???)
         this.addParser(".camping_skills.json", {
 			async parseFile(fPath:string, names:Set<string>) {
-                const buf = await fs.readBinaryFile(fPath);
+                const buf = Buffer.from(await fs.readBinaryFile(fPath));
 				const json = JSON.parse(buf.toString());
 		        const arrArray:any[] = json["skills"];
 				if (arrArray != null) {
@@ -89,7 +103,7 @@ export class NameGenerator {
 		// Quest types
         this.addParser(".types.json", {
 			async parseFile(fPath:string, names:Set<string>) {
-                const buf = Buffer.from(await fs.readBinaryFile(fPath));
+                const buf = await fs.readBinaryFile(fPath);
                 NameGenerator.addSimpleJSONArrayEntryIDs(buf, "types", "id", names);
 				NameGenerator.addSimpleJSONArrayEntryIDs(buf, "goals", "id", names);
 			}
@@ -98,7 +112,7 @@ export class NameGenerator {
 		// Quirks
         this.addParser("quirk_library.json", {
 			async parseFile(fPath:string, names:Set<string>) {
-                const buf = Buffer.from(await fs.readBinaryFile(fPath));
+                const buf = await fs.readBinaryFile(fPath);
                 NameGenerator.addSimpleJSONArrayEntryIDs(buf, "quirks", "id", names);
 			}
 		});
@@ -130,7 +144,7 @@ export class NameGenerator {
 		// Town events 
         this.addParser(".events.json", {
 			async parseFile(fPath:string, names:Set<string>) {
-                const buf = Buffer.from(await fs.readBinaryFile(fPath));
+                const buf = await fs.readBinaryFile(fPath);
                 await NameGenerator.addBaseName(fPath, names);
                 NameGenerator.addSimpleJSONArrayEntryIDs(buf, "events", "id", names)
 			}
@@ -140,7 +154,7 @@ export class NameGenerator {
         const inventoryParser:Parser = {
             async parseFile(fPath:string, names:Set<string>) {
 				// split lines
-				const lines = (await fs.readTextFile(fPath)).split("\r\n");
+				const lines = Buffer.from(await fs.readBinaryFile(fPath)).toString().split("\r\n");
 				for (let i = 0; i < lines.length; i++) {
 					const str = lines[i];
 					const matches = str.match(invRegex);
@@ -164,7 +178,7 @@ export class NameGenerator {
 		// Town events 
         this.addParser(".trinkets.json", {
 			async parseFile(fPath:string, names:Set<string>) {
-                const buf = Buffer.from(await fs.readBinaryFile(fPath));
+                const buf = await fs.readBinaryFile(fPath);
                 NameGenerator.addSimpleJSONArrayEntryIDs(buf, "entries", "id", names);
 			}
 		});
@@ -188,7 +202,7 @@ export class NameGenerator {
 		// Obstacles 
         this.addParser("obstacle_definitions.json", {
 			async parseFile(fPath:string, names:Set<string>) {
-                const buf = Buffer.from(await fs.readBinaryFile(fPath));
+                const buf = await fs.readBinaryFile(fPath);
                 NameGenerator.addSimpleJSONArrayEntryIDs(buf, "props", "name", names);
 			}
 		});
@@ -196,7 +210,7 @@ export class NameGenerator {
 		// Obstacles 
         this.addParser("quest.plot_quests.json", {
 			async parseFile(fPath:string, names:Set<string>) {
-                const buf = Buffer.from(await fs.readBinaryFile(fPath));
+                const buf = await fs.readBinaryFile(fPath);
                 NameGenerator.addSimpleJSONArrayEntryIDs(buf, "plot_quests", "id", names);
 			}
 		});
@@ -245,9 +259,9 @@ export class NameGenerator {
 		names.add(fileName);
 	}
 
-    static addSimpleJSONArrayEntryIDs(data:Buffer, arrayName:string, idString:string, set:Set<string>) {
+    static addSimpleJSONArrayEntryIDs(data:Uint8Array, arrayName:string, idString:string, set:Set<string>) {
 		try {
-			const json = JSON.parse(data.toString());
+			const json = JSON.parse(Buffer.from(data).toString());
 			const arrArray:any[] = json[arrayName];
 			if (arrArray != null) {
 				for (let i = 0; i < arrArray.length; i++) {
@@ -265,11 +279,11 @@ export class NameGenerator {
 
         for (let i = 0; i < gameDirs.length; i++) {
             const dirPath = gameDirs[i];
-            const files = await fs.readDir(dirPath, { recursive: true });
+            const files = recursiveFlatten(await fs.readDir(dirPath, { recursive: true }));
 
             if (files) {
                 for (let j = 0; j < files.length; j++) {
-                    const fileName = files[j].name;
+                    const fileName = files[j];
 
                     for (const parserSetKey of this.parsers.keys()) {
                         if (fileName.endsWith(parserSetKey)) {
