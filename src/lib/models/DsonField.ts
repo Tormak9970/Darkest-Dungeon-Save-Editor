@@ -36,6 +36,7 @@ export class DsonField {
     parent:DsonField;
 
     rawData:Uint8Array;
+    dataValue = null;
     dataString = "\"UNKNOWN. PLEASE PARSE TYPE\"";
     hashedValue:string;
     embeddedFile:DsonFile;
@@ -103,7 +104,8 @@ export class DsonField {
                 this.type = FieldType.TYPE_TWOINT;
                 const tmpArr = new Uint8Array(this.rawData.buffer, this.alignmentSkip(), 8);
                 const buf = new Reader(tmpArr);
-                this.dataString = "[" + buf.readInt32() + ", " + buf.readInt32() + "]";
+                this.dataValue = [buf.readInt32(), buf.readInt32()];
+                this.dataString = "[" + this.dataValue[0] + ", " + this.dataValue[1] + "]";
                 return true;
             }
         }
@@ -116,7 +118,8 @@ export class DsonField {
                 this.type = FieldType.TYPE_TWOINT;
                 const tmpArr = new Uint8Array(this.rawData.buffer, this.alignmentSkip(), 4);
                 const buf = new Reader(tmpArr);
-                this.dataString = "" + buf.readFloat32();
+                this.dataValue = buf.readFloat32();
+                this.dataString = "" + this.dataValue;
                 return true;
             }
         }
@@ -131,13 +134,18 @@ export class DsonField {
             // read the rest
             const strings = new Uint8Array(this.rawData, this.alignmentSkip() + 4, this.alignedSize() - 4);
             const bf = new Reader(strings);
+            this.dataValue = [];
             let sb = "";
             sb += "[";
 
             for (let i = 0; i < arrLen; i++) {
                 let strlen = bf.readInt32();
                 const tempArr2 = new Uint8Array(this.rawData, this.alignmentSkip() + 4 + bf.offset, strlen - 1);
-                sb += "\"" + decoder.decode(tempArr2).replaceAll("\n", "\\\\n") + "\"";
+                const strVal = decoder.decode(tempArr2);
+
+                this.dataValue.push(strVal);
+
+                sb += "\"" + strVal.replaceAll("\n", "\\\\n") + "\"";
                 bf.seek(bf.offset + strlen);
                 if (i < arrLen - 1) {
                     // Skip for alignment, but only if we have things following
@@ -168,6 +176,7 @@ export class DsonField {
                 sb += "[";
                 hsb += "[";
 
+                this.dataValue = [];
                 let foundHashed = false;
 
                 for (let i = 0; i < arrLen; i++) {
@@ -177,10 +186,12 @@ export class DsonField {
                     if ((behavior == UnhashBehavior.UNHASH || behavior == UnhashBehavior.POUNDUNHASH) && (unHashed = DsonTypes.NAME_TABLE.get(tempInt)) != null) {
                         unHashed = (behavior == UnhashBehavior.POUNDUNHASH) ? ("\"###" + unHashed + "\"") : ("\"" + unHashed + "\"");
                         sb += unHashed;
+                        this.dataValue.push(unHashed);
                         hsb += tempInt;
                         foundHashed = true;
                     } else {
                         sb += tempInt;
+                        this.dataValue.push(tempInt);
                         hsb += tempInt;
                     }
                     if (i != arrLen - 1) {
@@ -209,11 +220,13 @@ export class DsonField {
             const floats = new Uint8Array(this.rawData.buffer, this.alignmentSkip(), this.alignedSize());
             const buf = new Reader(floats);
             
+            this.dataValue = [];
             let res = "";
             res += "[";
 
             while (buf.remaining() > 0) {
                 const f = buf.readFloat32();
+                this.dataValue.push(f);
                 res += f;
 
                 if (buf.remaining() > 0) {
@@ -238,6 +251,7 @@ export class DsonField {
                 this.type = FieldType.TYPE_STRING;
                 const tmpArr2 = new Uint8Array(this.rawData.buffer, this.alignmentSkip()+4, 4+strlen-1);
                 this.dataString = "\"" + decoder.decode(tmpArr2) + "\"";
+                this.dataValue = this.dataString;
                 return true;
             }
         }
@@ -280,10 +294,6 @@ export class DsonField {
 
     private nameIterator() {
         return new ItteratorGenerator(JSON.parse(JSON.stringify(this)));
-    }
-
-    asJson() {
-        // TODO implement
     }
 }
 

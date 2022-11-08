@@ -139,7 +139,7 @@ class DsonMeta2BlockEntry {
 const decoder = new TextDecoder();
 
 export class DsonData {
-    fields:DsonField[] = [];
+    rootFields:DsonField[];
     
     constructor(reader:Reader, dson:DsonFile, unhashBehavior:UnhashBehavior) {
         const fieldStack = new Stack();
@@ -210,7 +210,7 @@ export class DsonData {
             throw new Error("Wrong number of fields");
         }
 
-        this.fields = rootFields;
+        this.rootFields = rootFields;
     }
 
     static readName(reader:Reader, offset:number, nameLength:number): string {
@@ -219,16 +219,45 @@ export class DsonData {
         return res;
     }
 
-    writeField(field:DsonField):Object {
-
+    writeField(field:DsonField):any {
+        if (field.type == FieldType.TYPE_OBJECT) {
+            return this.writeObject(field);
+        } else if (field.type == FieldType.TYPE_FILE) {
+            return field.embeddedFile.asJson();
+        } else {
+            return field.dataValue;
+        }
     }
 
-    writeObject(field:DsonField):Object {
+    writeObject(field:DsonField):any {
+        if (field.children.length > 0) {
+            const uniqueFields = new Set<string>();
+            const res = {};
 
+            for (let i = 0; i < field.children.length; i++) {
+                const cField = field.children[i];
+                if (!uniqueFields.has(cField.name)) {
+                    res[cField.name] = this.writeField(cField);
+                    uniqueFields.add(cField.name);
+                }
+            }
+
+            return res;
+        } else {
+            return {};
+        }
     }
 
-    asJson() {
+    asJson(): Object {
         // start with base_root and call writeField()
+        const res = {};
+
+        for (let i = 0; i < this.rootFields.length; i++) {
+            const rootField = this.rootFields[i];
+            res[rootField.name] = this.writeField(rootField);
+        }
+
+        return res;
     }
 }
 
@@ -251,7 +280,7 @@ export class DsonFile {
         this.data = new DsonData(reader, this, behavior);
     }
 
-    asJson() {
+    asJson(): Object {
         return this.data.asJson();
     }
 }

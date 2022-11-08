@@ -38,6 +38,22 @@ export class Utils {
     }
 }
 
+export function throttle(func:any, wait:number) {
+    let waiting = false;
+    return function () {
+        if (waiting) {
+            return;
+        } else {
+            func.apply(this, arguments);
+        }
+    
+        waiting = true;
+        setTimeout(() => {
+            waiting = false;
+        }, wait);
+    };
+}
+
 export class Stack {
     private stack:any[] = [];
 

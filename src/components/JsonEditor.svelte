@@ -89,4 +89,23 @@
 
 <style>
     @import "/theme.css";
+    .editor-content {
+        z-index: 1;
+        position: relative;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+    }
+    :global(.editor-content > .cm-editor) {
+        width: 100%;
+        min-height: 100%;
+        overflow-y: scroll;
+    }
+    :global(.editor-content > .cm-editor .cm-scroller) {
+        outline: none;
+        border: none;
+    }
 </style>

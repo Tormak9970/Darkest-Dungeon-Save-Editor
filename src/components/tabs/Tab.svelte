@@ -20,13 +20,13 @@
         display: flex;
         font-size: 12px;
         flex: 1;
-        width: calc(100% - 7px);
+        width: calc(100% - 16px);
         min-width: 100px;
 
         border: 1px solid black;
         background-color: var(--background);
         margin-bottom: 3px;
-        padding-left: 7px;
+        padding: 0px 7px;
 
         cursor: pointer;
     }
