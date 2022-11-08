@@ -43,6 +43,8 @@
 
         font-size: 12px;
         cursor: pointer;
+
+        color: rgb(231, 231, 231);
     }
 
     .button:hover {

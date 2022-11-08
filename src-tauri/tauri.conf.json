@@ -72,10 +72,10 @@
     "windows": [
       {
         "fullscreen": false,
-        "height": 690,
+        "height": 740,
         "resizable": true,
         "title": "DarkestDungeon Save Editor",
-        "width": 950,
+        "width": 1170,
         "decorations": false,
         "center": true
       }

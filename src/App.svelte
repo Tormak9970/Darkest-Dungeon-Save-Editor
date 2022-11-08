@@ -25,6 +25,9 @@
     import { AppController } from "./lib/controllers/AppController";
     
     import { gameDataDirPath, modDataDirPath, saveDirPath } from "./Stores";
+    import ProgressBar from "./components/info/ProgressBar.svelte";
+
+    $: loaderProgress = "0%";
 
     async function loadSave(e:Event) {
         const path = (e.currentTarget as HTMLInputElement).value;
@@ -40,6 +43,14 @@
     async function loadModData(e:Event) {
         const path = (e.currentTarget as HTMLInputElement).value;
         $modDataDirPath = path;
+    }
+
+    async function confirmDiscard(e:Event) {
+
+    }
+
+    async function discardChanges() {
+
     }
 
     async function saveChanges(e:Event) {
@@ -84,6 +95,15 @@
         </Pane>
         <Pane title="Save Data" fillParent>
             <Tabs />
+        </Pane>
+        <Pane padding={"7px"}>
+            <div class="bottom-panel">
+                <ProgressBar width={"300px"} progress={loaderProgress} />
+                <div style="width: 7px; height: 1px;" />
+                <Button text={"Discard Changes"} onClick={confirmDiscard} width={"120px"} />
+                <div style="width: 7px; height: 1px;" />
+                <Button text={"Save Changes"} onClick={saveChanges} width={"100px"} />
+            </div>
         </Pane>
 	</div>
 </main>
@@ -138,5 +158,13 @@
         flex-direction: column;
         justify-content: flex-start;
         align-items: center;
+    }
+
+    .bottom-panel {
+        width: 100%;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-end;
     }
 </style>
