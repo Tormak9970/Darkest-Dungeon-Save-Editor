@@ -7,7 +7,7 @@
     "distDir": "../dist"
   },
   "package": {
-    "productName": "DarkestDungeon Save Editor",
+    "productName": "Darkest Dungeon Save Editor",
     "version": "1.0.0"
   },
   "tauri": {
@@ -44,7 +44,7 @@
       "deb": { "depends": [] },
       "externalBin": [],
       "icon": [ "icons/32x32.png", "icons/128x128.png", "icons/128x128@2x.png", "icons/icon.icns", "icons/icon.ico" ],
-      "identifier": "dev.tormak.darkestdungeon-save-editor",
+      "identifier": "dev.tormak.darkest-dungeon-save-editor",
       "longDescription": "",
       "macOS": {
         "entitlements": null,
