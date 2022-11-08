@@ -70,6 +70,7 @@ export class AppController {
         tabs.set(newTabs);
         dsonFiles.set(newDsonFiles);
 
+        console.log(newDsonFiles)
         console.log(newTabs);
     }
 

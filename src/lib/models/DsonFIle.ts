@@ -180,7 +180,11 @@ export class DsonData {
             }
 
             if (fieldStack.isEmpty()) {
-                rootFields.push(field);
+                if (field.type != FieldType.TYPE_OBJECT) {
+                    console.log("No top level object in dson");
+                } else {
+                    rootFields.push(field);
+                }
             } else {
                 if (!fieldStack.peek().addChild(field)) {
                     throw new Error("Failed to add child");
@@ -196,8 +200,7 @@ export class DsonData {
                 parentIdxStack.push(runningObjIdx);
             }
 
-            const top = fieldStack.peek();
-            while (!fieldStack.isEmpty() && JSON.stringify(top.type) == JSON.stringify(FieldType.TYPE_OBJECT) && top.hasAllChildren()) {
+            while (!fieldStack.isEmpty() && JSON.stringify(fieldStack.peek().type) == JSON.stringify(FieldType.TYPE_OBJECT) && fieldStack.peek().hasAllChildren()) {
                 fieldStack.pop();
                 parentIdxStack.pop();
             }
@@ -249,7 +252,6 @@ export class DsonData {
     }
 
     asJson(): Object {
-        // start with base_root and call writeField()
         const res = {};
 
         for (let i = 0; i < this.rootFields.length; i++) {

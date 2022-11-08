@@ -32,7 +32,7 @@ export class DsonField {
     meta2EntryIdx = -1;
 
     name:string;
-    type:any;
+    type:any = FieldType.TYPE_UNKNOWN;
     parent:DsonField;
 
     rawData:Uint8Array;
@@ -54,13 +54,16 @@ export class DsonField {
         } else if (this.rawData.length == 1) {
             if (this.rawData[0] >= 0x20 && this.rawData[0] <= 0x7E) {
                 this.type = FieldType.TYPE_CHAR;
+                this.dataValue = String.fromCharCode(this.rawData[0]);
                 this.dataString = "\"" + String.fromCharCode(this.rawData[0]) + "\"";
             } else {
                 this.type = FieldType.TYPE_BOOL;
+                this.dataValue = this.rawData[0] == 0x00;
                 this.dataString = this.rawData[0] == 0x00 ? DsonField.STR_FALSE : DsonField.STR_TRUE;
             }
         } else if (this.alignedSize() == 8 && (this.rawData[this.alignmentSkip() + 0] == 0x00 || this.rawData[this.alignmentSkip() + 0] == 0x01) && (this.rawData[this.alignmentSkip() + 4] == 0x00 || this.rawData[this.alignmentSkip() + 4] == 0x01)) {
             this.type = FieldType.TYPE_TWOBOOL;
+            this.dataValue = [this.rawData[this.alignmentSkip() + 0] == 0x00, this.rawData[this.alignmentSkip() + 4] == 0x00];
             this.dataString = "[" + (this.rawData[this.alignmentSkip() + 0] == 0x00 ? DsonField.STR_FALSE : DsonField.STR_TRUE) + ", " + (this.rawData[this.alignmentSkip() + 4] == 0x00 ? DsonField.STR_FALSE : DsonField.STR_TRUE) + "]";
         } else if (this.alignedSize() == 4) {
             this.type = FieldType.TYPE_INT;
@@ -71,7 +74,8 @@ export class DsonField {
                 const unHashed = DsonTypes.NAME_TABLE.get(tempInt);
                 if (unHashed != null) {
                     this.hashedValue = this.dataString;
-                    this.dataString = (behavior == UnhashBehavior.POUNDUNHASH) ? ("\"###" + unHashed + "\"") : ("\"" + unHashed + "\"");
+                    this.dataValue = (behavior == UnhashBehavior.POUNDUNHASH) ? ("###" + unHashed) : ("" + unHashed)
+                    this.dataString = "\"" + this.dataValue + "\"";
                 }
             }
         } else if (this.parseString()) {
