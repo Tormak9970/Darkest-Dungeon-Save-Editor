@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>
  */
-import type { Reader } from "../utils/Reader";
+import { Reader } from "../utils/Reader";
 import { Stack } from "../utils/Utils";
 import { DsonField } from "./DsonField";
 import { FieldType } from "./DsonTypes";
@@ -181,7 +181,7 @@ export class DsonData {
 
             if (fieldStack.isEmpty()) {
                 if (field.type != FieldType.TYPE_OBJECT) {
-                    console.log("No top level object in dson");
+                    throw new Error("No top level object in dson");
                 } else {
                     rootFields.push(field);
                 }

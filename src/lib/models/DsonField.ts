@@ -48,6 +48,7 @@ export class DsonField {
         this.children = [];
     }
 
+    //? Booleans and Chars work correctly
     guessType(behavior:UnhashBehavior): boolean {
         if (this.parseHardcodedType(behavior)) {
             return true;
@@ -58,17 +59,22 @@ export class DsonField {
                 this.dataString = "\"" + String.fromCharCode(this.rawData[0]) + "\"";
             } else {
                 this.type = FieldType.TYPE_BOOL;
-                this.dataValue = this.rawData[0] == 0x00;
+                this.dataValue = this.rawData[0] != 0x00;
                 this.dataString = this.rawData[0] == 0x00 ? DsonField.STR_FALSE : DsonField.STR_TRUE;
             }
-        } else if (this.alignedSize() == 8 && (this.rawData[this.alignmentSkip() + 0] == 0x00 || this.rawData[this.alignmentSkip() + 0] == 0x01) && (this.rawData[this.alignmentSkip() + 4] == 0x00 || this.rawData[this.alignmentSkip() + 4] == 0x01)) {
+        } else if (this.alignedSize() == 8 && (this.rawData[this.alignmentSkip() + 0] == 0x00 || this.rawData[this.alignmentSkip() + 0] == 0x01) 
+            && (this.rawData[this.alignmentSkip() + 4] == 0x00 || this.rawData[this.alignmentSkip() + 4] == 0x01)) {
             this.type = FieldType.TYPE_TWOBOOL;
             this.dataValue = [this.rawData[this.alignmentSkip() + 0] == 0x00, this.rawData[this.alignmentSkip() + 4] == 0x00];
-            this.dataString = "[" + (this.rawData[this.alignmentSkip() + 0] == 0x00 ? DsonField.STR_FALSE : DsonField.STR_TRUE) + ", " + (this.rawData[this.alignmentSkip() + 4] == 0x00 ? DsonField.STR_FALSE : DsonField.STR_TRUE) + "]";
+            this.dataString = "[" + (this.rawData[this.alignmentSkip() + 0] == 0x00 ? DsonField.STR_FALSE : DsonField.STR_TRUE) + ", "
+                + (this.rawData[this.alignmentSkip() + 4] == 0x00 ? DsonField.STR_FALSE : DsonField.STR_TRUE) + "]";
         } else if (this.alignedSize() == 4) {
             this.type = FieldType.TYPE_INT;
             const tempArr = new Int8Array(this.rawData, this.alignmentSkip(), 4);
-            const tempInt = new Reader(tempArr).readInt32();
+            const tempInt = new Reader(tempArr.buffer).readInt32();
+
+            console.log(this.name + ": " + tempInt);
+
             this.dataString = tempInt.toString();
             if (behavior == UnhashBehavior.UNHASH || behavior == UnhashBehavior.POUNDUNHASH) {
                 const unHashed = DsonTypes.NAME_TABLE.get(tempInt);
@@ -281,9 +287,18 @@ export class DsonField {
         return res;
     }
 
-    private rawSize():number { return this.rawData.length; }
-    private alignedSize():number { return this.rawSize() - this.alignmentSkip(); }
-    private alignmentSkip():number { return (4 - (this.dataOffRelToData % 4)) % 4; }
+    private rawSize():number {
+        return this.rawData.length;
+    }
+    
+    private alignedSize():number {
+        return this.rawSize() - this.alignmentSkip();
+    }
+
+    // ! suspect this is causing issues
+    private alignmentSkip():number {
+        return (4 - (this.dataOffRelToData % 4)) % 4;
+    }
 
     addChild(child:DsonField): boolean {
         if (this.children.length < this.numChildren) {
