@@ -113,7 +113,7 @@ export class DsonTypes {
             checkString = nameIter.next();
 
             for (let j = arr[i].length - 1; j >= 0; j--) {
-                if (checkString == null || !(arr[i][j] == "*") || arr[i][j] == checkString) {
+                if (checkString == null || !((arr[i][j] == "*") || arr[i][j] == checkString)) {
                     match = false;
                     break;
                 }

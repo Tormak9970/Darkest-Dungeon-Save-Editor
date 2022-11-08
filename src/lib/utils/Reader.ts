@@ -11,7 +11,7 @@ let GLOBAL_ENDIANNESS = true;
     length:number;
     view: DataView;
 
-    constructor(data: Uint8Array|ArrayBuffer) {
+    constructor(data: Uint8Array|Int8Array|ArrayBuffer) {
         this.data = (this.#isUint8Array(data)) ? data.buffer : data;
         this.view = new DataView(this.data);
         this.length = (new Uint8Array(this.data)).length;

@@ -23,11 +23,7 @@ import { UnhashBehavior } from "./UnhashBehavior";
 const decoder = new TextDecoder();
 
 export class DsonField {
-    static STR_TRUE = "true";
-    static STR_FALSE = "false";
-
     dataStartInFile:number;
-    dataOffRelToData:number;
     meta1EntryIdx = -1;
     meta2EntryIdx = -1;
 
@@ -48,7 +44,7 @@ export class DsonField {
         this.children = [];
     }
 
-    //? Booleans and Chars work correctly
+    //? all of the else if conditions work
     guessType(behavior:UnhashBehavior): boolean {
         if (this.parseHardcodedType(behavior)) {
             return true;
@@ -60,21 +56,19 @@ export class DsonField {
             } else {
                 this.type = FieldType.TYPE_BOOL;
                 this.dataValue = this.rawData[0] != 0x00;
-                this.dataString = this.rawData[0] == 0x00 ? DsonField.STR_FALSE : DsonField.STR_TRUE;
+                this.dataString = this.dataValue.toString();
             }
         } else if (this.alignedSize() == 8 && (this.rawData[this.alignmentSkip() + 0] == 0x00 || this.rawData[this.alignmentSkip() + 0] == 0x01) 
             && (this.rawData[this.alignmentSkip() + 4] == 0x00 || this.rawData[this.alignmentSkip() + 4] == 0x01)) {
             this.type = FieldType.TYPE_TWOBOOL;
-            this.dataValue = [this.rawData[this.alignmentSkip() + 0] == 0x00, this.rawData[this.alignmentSkip() + 4] == 0x00];
-            this.dataString = "[" + (this.rawData[this.alignmentSkip() + 0] == 0x00 ? DsonField.STR_FALSE : DsonField.STR_TRUE) + ", "
-                + (this.rawData[this.alignmentSkip() + 4] == 0x00 ? DsonField.STR_FALSE : DsonField.STR_TRUE) + "]";
+            this.dataValue = [this.rawData[this.alignmentSkip() + 0] != 0x00, this.rawData[this.alignmentSkip() + 4] != 0x00];
+            this.dataString = "[" + this.dataValue[0].toString() + ", " + this.dataValue[1].toString() + "]";
         } else if (this.alignedSize() == 4) {
             this.type = FieldType.TYPE_INT;
-            const tempArr = new Int8Array(this.rawData, this.alignmentSkip(), 4);
-            const tempInt = new Reader(tempArr.buffer).readInt32();
+            const tempArr = this.rawData.slice(this.alignmentSkip(), this.alignmentSkip() + 4);
+            const tempInt = new Reader(tempArr).readInt32();
 
-            console.log(this.name + ": " + tempInt);
-
+            this.dataValue = tempInt;
             this.dataString = tempInt.toString();
             if (behavior == UnhashBehavior.UNHASH || behavior == UnhashBehavior.POUNDUNHASH) {
                 const unHashed = DsonTypes.NAME_TABLE.get(tempInt);
@@ -87,8 +81,8 @@ export class DsonField {
         } else if (this.parseString()) {
             // Some strings are actually embedded files
             if (this.dataString.length >= 6) {
-                const unquoteData = new Int8Array(this.rawData, this.alignmentSkip() + 4, this.rawData.length - this.alignmentSkip() + 4);
-                const tempHeader = new Reader(new Int8Array(unquoteData, 0, 4)).readInt32();
+                const unquoteData = this.rawData.slice(this.alignmentSkip() + 4, this.rawData.length);
+                const tempHeader = new Reader(unquoteData).readInt32();
                 if (tempHeader == MAGIC_NUMBER) {
                     this.type = FieldType.TYPE_FILE;
                     this.embeddedFile = new DsonFile(new Reader(unquoteData), behavior);
@@ -105,16 +99,22 @@ export class DsonField {
     }
 
     private parseHardcodedType(behavior:UnhashBehavior):boolean {
-        return this.parseFloatArray() || this.parseIntVector(behavior) || this.parseStringVector() || this.parseFloat() || this.parseTwoInt();
+        return this.parseFloatArray() ||
+            this.parseIntVector(behavior) ||
+            this.parseStringVector() ||
+            this.parseFloat() ||
+            this.parseTwoInt();
     }
 
+    // * Have not validated as I can't find fields that fit. should work tho
     private parseTwoInt(): boolean {
         if (DsonTypes.isA(FieldType.TYPE_TWOINT, this.nameIterator())) {
             if (this.alignedSize() == 8) {
                 this.type = FieldType.TYPE_TWOINT;
-                const tmpArr = new Int8Array(this.rawData.buffer, this.alignmentSkip(), 8);
+                const tmpArr = this.rawData.slice(this.alignmentSkip(), this.alignmentSkip() + 8);
                 const buf = new Reader(tmpArr);
                 this.dataValue = [buf.readInt32(), buf.readInt32()];
+                console.log("TWO_INT: " + this.dataValue);
                 this.dataString = "[" + this.dataValue[0] + ", " + this.dataValue[1] + "]";
                 return true;
             }
@@ -122,11 +122,12 @@ export class DsonField {
         return false;
     }
 
+    // ? validated this works correctly
     private parseFloat(): boolean {
         if (DsonTypes.isA(FieldType.TYPE_FLOAT, this.nameIterator())) {
             if (this.alignedSize() == 4) {
                 this.type = FieldType.TYPE_TWOINT;
-                const tmpArr = new Int8Array(this.rawData.buffer, this.alignmentSkip(), 4);
+                const tmpArr = this.rawData.slice(this.alignmentSkip(), this.alignmentSkip() + 4);
                 const buf = new Reader(tmpArr);
                 this.dataValue = buf.readFloat32();
                 this.dataString = "" + this.dataValue;
@@ -136,13 +137,14 @@ export class DsonField {
         return false;
     }
 
+    // ? validated this works correctly
     private parseStringVector(): boolean {
         if (DsonTypes.isA(FieldType.TYPE_STRINGVECTOR, this.nameIterator())) {
             this.type = FieldType.TYPE_STRINGVECTOR;
-            const tempArr = new Int8Array(this.rawData, this.alignmentSkip(), 4);
+            const tempArr = this.rawData.slice(this.alignmentSkip(), this.alignmentSkip() + 4);
             const arrLen = new Reader(tempArr).readInt32();
             // read the rest
-            const strings = new Int8Array(this.rawData, this.alignmentSkip() + 4, this.alignedSize() - 4);
+            const strings = this.rawData.slice(this.alignmentSkip() + 4, this.alignmentSkip() + this.alignedSize());
             const bf = new Reader(strings);
             this.dataValue = [];
             let sb = "";
@@ -150,7 +152,7 @@ export class DsonField {
 
             for (let i = 0; i < arrLen; i++) {
                 let strlen = bf.readInt32();
-                const tempArr2 = new Int8Array(this.rawData, this.alignmentSkip() + 4 + bf.offset, strlen - 1);
+                const tempArr2 = this.rawData.slice(this.alignmentSkip() + 4 + bf.offset, this.alignmentSkip() + 4 + bf.offset + strlen - 1);
                 const strVal = decoder.decode(tempArr2);
 
                 this.dataValue.push(strVal);
@@ -171,13 +173,14 @@ export class DsonField {
         return false;
     }
 
+    // ? validated this works correctly
     private parseIntVector(behavior:UnhashBehavior): boolean {
         if (DsonTypes.isA(FieldType.TYPE_INTVECTOR, this.nameIterator())) {
-            const tempArr = new Int8Array(this.rawData.buffer, this.alignmentSkip(), 4);
+            const tempArr = this.rawData.slice(this.alignmentSkip(), this.alignmentSkip() + 4);
             const arrLen = new Reader(tempArr).readInt32();
             if (this.alignedSize() == (arrLen + 1) * 4) {
                 this.type = FieldType.TYPE_INTVECTOR;
-                const tempArr2 = new Int8Array(this.rawData.buffer, this.alignmentSkip() + 4, (arrLen + 1) * 4);
+                const tempArr2 = this.rawData.slice(this.alignmentSkip() + 4, this.alignmentSkip() + 4 + (arrLen + 1) * 4);
 
                 const buffer = new Reader(tempArr2);
                 let sb = "";
@@ -194,8 +197,9 @@ export class DsonField {
                     let unHashed:string;
 
                     if ((behavior == UnhashBehavior.UNHASH || behavior == UnhashBehavior.POUNDUNHASH) && (unHashed = DsonTypes.NAME_TABLE.get(tempInt)) != null) {
-                        unHashed = (behavior == UnhashBehavior.POUNDUNHASH) ? ("\"###" + unHashed + "\"") : ("\"" + unHashed + "\"");
-                        sb += unHashed;
+                        unHashed = (behavior == UnhashBehavior.POUNDUNHASH) ? ("###" + unHashed) : ("" + unHashed)
+                        const strUnHashed = "\"" + unHashed + "\"";
+                        sb += strUnHashed;
                         this.dataValue.push(unHashed);
                         hsb += tempInt;
                         foundHashed = true;
@@ -224,10 +228,11 @@ export class DsonField {
         return false;
     }
 
+    // * Have not validated as I can't find fields that fit. should work tho
     private parseFloatArray(): boolean {
         if (DsonTypes.isA(FieldType.TYPE_FLOATARRAY, this.nameIterator())) {
             this.type = FieldType.TYPE_FLOATARRAY;
-            const floats = new Int8Array(this.rawData.buffer, this.alignmentSkip(), this.alignedSize());
+            const floats = this.rawData.slice(this.alignmentSkip(), this.alignmentSkip() + this.alignedSize())
             const buf = new Reader(floats);
             
             this.dataValue = [];
@@ -251,15 +256,16 @@ export class DsonField {
         return false;
     }
 
+    // ? validated
     private parseString(): boolean {
         if (this.alignedSize() >= 5) {
-            const tmpArr = new Int8Array(this.rawData.buffer, this.alignmentSkip(), 4);
+            const tmpArr = this.rawData.slice(this.alignmentSkip(), this.alignmentSkip() + 4)
             const buf = new Reader(tmpArr);
             const strlen = buf.readInt32();
             
             if (this.alignedSize() == 4 + strlen) {
                 this.type = FieldType.TYPE_STRING;
-                const tmpArr2 = new Int8Array(this.rawData.buffer, this.alignmentSkip()+4, 4+strlen-1);
+                const tmpArr2 = this.rawData.slice(this.alignmentSkip()+4, this.alignmentSkip()+4+strlen-1);
                 this.dataValue = decoder.decode(tmpArr2);
                 this.dataString = "\"" + this.dataValue + "\"";
                 return true;
@@ -295,9 +301,8 @@ export class DsonField {
         return this.rawSize() - this.alignmentSkip();
     }
 
-    // ! suspect this is causing issues
     private alignmentSkip():number {
-        return (4 - (this.dataOffRelToData % 4)) % 4;
+        return (4 - (this.dataStartInFile % 4)) % 4;
     }
 
     addChild(child:DsonField): boolean {

@@ -152,7 +152,7 @@ export class DsonData {
         for (let i = 0; i < dson.meta2Block.entries.length; i++) {
             const meta2Entry = dson.meta2Block.entries[i];
             const field = new DsonField();
-            field.name = DsonData.readName(reader, dson.header.dataOffset + meta2Entry.offset, meta2Entry.nameLen-1);
+            field.name = DsonData.readName(reader, meta2Entry.offset, meta2Entry.nameLen-1);
             
             if (meta2Entry.isObject) {
                 field.meta1EntryIdx = meta2Entry.meta1BlockIdx;
@@ -160,15 +160,14 @@ export class DsonData {
             field.meta2EntryIdx = i;
             reader.seek(1, 1);
             field.dataStartInFile = reader.offset;
-            field.dataOffRelToData = field.dataStartInFile - dson.header.dataOffset;
 
             let nextOff = dson.meta2Block.findNextSmallestOffset(meta2Entry.offset);
             let dataLen:number;
 
             if (nextOff > 0) {
-                dataLen = nextOff - field.dataOffRelToData;
+                dataLen = nextOff - field.dataStartInFile;
             } else {
-                dataLen = dson.header.dataLength - field.dataOffRelToData; //accounts for dataStart being relative to begging of reader
+                dataLen = dson.header.dataLength - field.dataStartInFile; //accounts for dataStart being relative to begging of reader
             }
 
             field.rawData = reader.readSignedBytes(dataLen);
@@ -279,7 +278,7 @@ export class DsonFile {
         this.meta2Block = new DsonMeta2Block(reader, this.header);
 
         reader.seek(this.header.dataOffset);
-        this.data = new DsonData(reader, this, behavior);
+        this.data = new DsonData(new Reader(reader.data.slice(this.header.dataOffset, this.header.dataOffset + this.header.dataLength)), this, behavior);
     }
 
     asJson(): Object {
