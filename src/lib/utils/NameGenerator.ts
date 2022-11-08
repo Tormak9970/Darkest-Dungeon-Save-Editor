@@ -69,10 +69,6 @@ export class NameGenerator {
 		});
 
 		// Camping skills
-		// Camping skills do NOT have corresponding upgrade trees,
-		// even though they appear in persist.upgrades.json
-		// the actual saved hashed tree name is "soldierclass.skill", even though skills may be shared
-		// (Though the backer file has the skills in pure form???)
         this.addParser(".camping_skills.json", {
 			async parseFile(fPath:string, names:Set<string>) {
                 const buf = Buffer.from(await fs.readBinaryFile(fPath));

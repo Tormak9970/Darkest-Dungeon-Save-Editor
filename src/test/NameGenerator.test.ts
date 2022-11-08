@@ -21,8 +21,8 @@ import { NameGenerator } from "../lib/utils/NameGenerator";
 describe("Test Suite for NameGenerator class", () => {
     const testGenerator = new NameGenerator();
 
-    test("findNames Tests", () => {
-        const names = testGenerator.findNames(["C:\\Program Files (x86)\\Steam\\steamapps\\common\\DarkestDungeon"]);
+    test("findNames Tests", async () => {
+        const names = await testGenerator.findNames(["C:\\Program Files (x86)\\Steam\\steamapps\\common\\DarkestDungeon"]);
 
         expect(names.size).toEqual(2120);
     });

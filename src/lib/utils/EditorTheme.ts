@@ -1,24 +1,23 @@
+/**
+ * DarkestDungeon Save Editor is a tool for viewing and modifying DarkestDungeon game saves.
+ * Copyright (C) 2022 Travis Lane (Tormak)
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>
+ */
 import { HighlightStyle } from "@codemirror/language";
 import { EditorView } from "@codemirror/view";
 import {tags} from "@lezer/highlight"
-
-// Using https://github.com/one-dark/vscode-one-dark-theme/ as reference for the colors
-
-// :root {
-//     --black-alt: #252424;
-//     --black-alt-hover: rgb(41, 41, 41);
-
-//     --grey-black: #1a1a1a;
-//     --grey-black-hover: #2b2b2b;
-    
-//     --medium-grey: #333;
-//     --medium-grey-hover: rgb(61, 61, 61);
-
-//     --medium-grey-alt: #242424;
-//     --medium-grey-alt-hover: #2c2c2c;
-
-//     --background-yellow-slicers: #ffce00;
-// }
 
 const ivory = "#c1c7d4",
   stone = "#7d8799", // Brightened compared to original to increase contrast
