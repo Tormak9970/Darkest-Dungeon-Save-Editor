@@ -219,8 +219,16 @@ export class DsonData {
         return res;
     }
 
+    writeField(field:DsonField):Object {
+
+    }
+
+    writeObject(field:DsonField):Object {
+
+    }
+
     asJson() {
-        return this.fields.map(field => field.asJson());
+        // start with base_root and call writeField()
     }
 }
 
