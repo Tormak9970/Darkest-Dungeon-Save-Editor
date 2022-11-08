@@ -171,7 +171,7 @@ export class DsonData {
                 dataLen = dson.header.dataLength - field.dataOffRelToData; //accounts for dataStart being relative to begging of reader
             }
 
-            field.rawData = reader.readBytes(dataLen);
+            field.rawData = reader.readSignedBytes(dataLen);
 
             if (meta2Entry.isObject) {
                 field.type = FieldType.TYPE_OBJECT;
@@ -218,7 +218,7 @@ export class DsonData {
 
     static readName(reader:Reader, offset:number, nameLength:number): string {
         reader.seek(offset);
-        const res = decoder.decode(reader.readBytes(nameLength));
+        const res = decoder.decode(reader.readSignedBytes(nameLength));
         return res;
     }
 

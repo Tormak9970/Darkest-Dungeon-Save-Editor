@@ -35,7 +35,7 @@ export class DsonField {
     type:any = FieldType.TYPE_UNKNOWN;
     parent:DsonField;
 
-    rawData:Uint8Array;
+    rawData:Int8Array;
     dataValue = null;
     dataString = "\"UNKNOWN. PLEASE PARSE TYPE\"";
     hashedValue:string;
@@ -67,7 +67,7 @@ export class DsonField {
             this.dataString = "[" + (this.rawData[this.alignmentSkip() + 0] == 0x00 ? DsonField.STR_FALSE : DsonField.STR_TRUE) + ", " + (this.rawData[this.alignmentSkip() + 4] == 0x00 ? DsonField.STR_FALSE : DsonField.STR_TRUE) + "]";
         } else if (this.alignedSize() == 4) {
             this.type = FieldType.TYPE_INT;
-            const tempArr = new Uint8Array(this.rawData, this.alignmentSkip(), 4);
+            const tempArr = new Int8Array(this.rawData, this.alignmentSkip(), 4);
             const tempInt = new Reader(tempArr).readInt32();
             this.dataString = tempInt.toString();
             if (behavior == UnhashBehavior.UNHASH || behavior == UnhashBehavior.POUNDUNHASH) {
@@ -81,8 +81,8 @@ export class DsonField {
         } else if (this.parseString()) {
             // Some strings are actually embedded files
             if (this.dataString.length >= 6) {
-                const unquoteData = new Uint8Array(this.rawData, this.alignmentSkip() + 4, this.rawData.length - this.alignmentSkip() + 4);
-                const tempHeader = new Reader(new Uint8Array(unquoteData, 0, 4)).readInt32();
+                const unquoteData = new Int8Array(this.rawData, this.alignmentSkip() + 4, this.rawData.length - this.alignmentSkip() + 4);
+                const tempHeader = new Reader(new Int8Array(unquoteData, 0, 4)).readInt32();
                 if (tempHeader == MAGIC_NUMBER) {
                     this.type = FieldType.TYPE_FILE;
                     this.embeddedFile = new DsonFile(new Reader(unquoteData), behavior);
@@ -106,7 +106,7 @@ export class DsonField {
         if (DsonTypes.isA(FieldType.TYPE_TWOINT, this.nameIterator())) {
             if (this.alignedSize() == 8) {
                 this.type = FieldType.TYPE_TWOINT;
-                const tmpArr = new Uint8Array(this.rawData.buffer, this.alignmentSkip(), 8);
+                const tmpArr = new Int8Array(this.rawData.buffer, this.alignmentSkip(), 8);
                 const buf = new Reader(tmpArr);
                 this.dataValue = [buf.readInt32(), buf.readInt32()];
                 this.dataString = "[" + this.dataValue[0] + ", " + this.dataValue[1] + "]";
@@ -120,7 +120,7 @@ export class DsonField {
         if (DsonTypes.isA(FieldType.TYPE_FLOAT, this.nameIterator())) {
             if (this.alignedSize() == 4) {
                 this.type = FieldType.TYPE_TWOINT;
-                const tmpArr = new Uint8Array(this.rawData.buffer, this.alignmentSkip(), 4);
+                const tmpArr = new Int8Array(this.rawData.buffer, this.alignmentSkip(), 4);
                 const buf = new Reader(tmpArr);
                 this.dataValue = buf.readFloat32();
                 this.dataString = "" + this.dataValue;
@@ -133,10 +133,10 @@ export class DsonField {
     private parseStringVector(): boolean {
         if (DsonTypes.isA(FieldType.TYPE_STRINGVECTOR, this.nameIterator())) {
             this.type = FieldType.TYPE_STRINGVECTOR;
-            const tempArr = new Uint8Array(this.rawData, this.alignmentSkip(), 4);
+            const tempArr = new Int8Array(this.rawData, this.alignmentSkip(), 4);
             const arrLen = new Reader(tempArr).readInt32();
             // read the rest
-            const strings = new Uint8Array(this.rawData, this.alignmentSkip() + 4, this.alignedSize() - 4);
+            const strings = new Int8Array(this.rawData, this.alignmentSkip() + 4, this.alignedSize() - 4);
             const bf = new Reader(strings);
             this.dataValue = [];
             let sb = "";
@@ -144,7 +144,7 @@ export class DsonField {
 
             for (let i = 0; i < arrLen; i++) {
                 let strlen = bf.readInt32();
-                const tempArr2 = new Uint8Array(this.rawData, this.alignmentSkip() + 4 + bf.offset, strlen - 1);
+                const tempArr2 = new Int8Array(this.rawData, this.alignmentSkip() + 4 + bf.offset, strlen - 1);
                 const strVal = decoder.decode(tempArr2);
 
                 this.dataValue.push(strVal);
@@ -167,11 +167,11 @@ export class DsonField {
 
     private parseIntVector(behavior:UnhashBehavior): boolean {
         if (DsonTypes.isA(FieldType.TYPE_INTVECTOR, this.nameIterator())) {
-            const tempArr = new Uint8Array(this.rawData.buffer, this.alignmentSkip(), 4);
+            const tempArr = new Int8Array(this.rawData.buffer, this.alignmentSkip(), 4);
             const arrLen = new Reader(tempArr).readInt32();
             if (this.alignedSize() == (arrLen + 1) * 4) {
                 this.type = FieldType.TYPE_INTVECTOR;
-                const tempArr2 = new Uint8Array(this.rawData.buffer, this.alignmentSkip() + 4, (arrLen + 1) * 4);
+                const tempArr2 = new Int8Array(this.rawData.buffer, this.alignmentSkip() + 4, (arrLen + 1) * 4);
 
                 const buffer = new Reader(tempArr2);
                 let sb = "";
@@ -221,7 +221,7 @@ export class DsonField {
     private parseFloatArray(): boolean {
         if (DsonTypes.isA(FieldType.TYPE_FLOATARRAY, this.nameIterator())) {
             this.type = FieldType.TYPE_FLOATARRAY;
-            const floats = new Uint8Array(this.rawData.buffer, this.alignmentSkip(), this.alignedSize());
+            const floats = new Int8Array(this.rawData.buffer, this.alignmentSkip(), this.alignedSize());
             const buf = new Reader(floats);
             
             this.dataValue = [];
@@ -247,15 +247,15 @@ export class DsonField {
 
     private parseString(): boolean {
         if (this.alignedSize() >= 5) {
-            const tmpArr = new Uint8Array(this.rawData.buffer, this.alignmentSkip(), 4);
+            const tmpArr = new Int8Array(this.rawData.buffer, this.alignmentSkip(), 4);
             const buf = new Reader(tmpArr);
             const strlen = buf.readInt32();
             
             if (this.alignedSize() == 4 + strlen) {
                 this.type = FieldType.TYPE_STRING;
-                const tmpArr2 = new Uint8Array(this.rawData.buffer, this.alignmentSkip()+4, 4+strlen-1);
-                this.dataString = "\"" + decoder.decode(tmpArr2) + "\"";
-                this.dataValue = this.dataString;
+                const tmpArr2 = new Int8Array(this.rawData.buffer, this.alignmentSkip()+4, 4+strlen-1);
+                this.dataValue = decoder.decode(tmpArr2);
+                this.dataString = "\"" + this.dataValue + "\"";
                 return true;
             }
         }
@@ -288,6 +288,7 @@ export class DsonField {
     addChild(child:DsonField): boolean {
         if (this.children.length < this.numChildren) {
             this.children.push(child);
+            child.parent = this;
             return true;
         } else {
             return false;
@@ -297,15 +298,15 @@ export class DsonField {
     hasAllChildren(): boolean { return this.children.length == this.numChildren; }
 
     private nameIterator() {
-        return new ItteratorGenerator(JSON.parse(JSON.stringify(this)));
+        return new ItteratorGenerator(this);
     }
 }
 
 export class ItteratorGenerator {
-    private field:DsonField;
+    private field:{name:string, parent:DsonField};
 
     constructor(field:DsonField) {
-        this.field = field;
+        this.field = {name: field.name, parent: field.parent};
     }
 
     get() {
@@ -314,9 +315,9 @@ export class ItteratorGenerator {
 }
 
 export class Itterator {
-    private field:DsonField;
+    private field:{name:string, parent:DsonField};
 
-    constructor(field:DsonField) {
+    constructor(field:{name:string, parent:DsonField}) {
         this.field = field;
     }
     hasNext():boolean {
@@ -324,7 +325,7 @@ export class Itterator {
     }
     next():string {
         const f = this.field.name;
-        this.field = this.field.parent ? this.field.parent : null;
+        this.field = this.field.parent ? {name: this.field.parent.name, parent: this.field.parent.parent} : null;
         return f;
     }
 }

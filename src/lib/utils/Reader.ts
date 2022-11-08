@@ -76,7 +76,18 @@ let GLOBAL_ENDIANNESS = true;
      * @param  {number} length the number of bytes to read
      * @param  {boolean} endianness whether or not to use littleEdian. Default is true.
      */
-    readBytes(length: number, endianness?: boolean) {
+    readSignedBytes(length: number, endianness?: boolean) {
+        const res = new Int8Array(this.data, this.offset, length);
+        this.offset += length;
+        return (endianness ? endianness : GLOBAL_ENDIANNESS) ? res : res.reverse();
+    }
+
+    /**
+     * reads the next (length) bytes and returns a Uint8 array.
+     * @param  {number} length the number of bytes to read
+     * @param  {boolean} endianness whether or not to use littleEdian. Default is true.
+     */
+    readUnsignedBytes(length: number, endianness?: boolean) {
         const res = new Uint8Array(this.data, this.offset, length);
         this.offset += length;
         return (endianness ? endianness : GLOBAL_ENDIANNESS) ? res : res.reverse();
