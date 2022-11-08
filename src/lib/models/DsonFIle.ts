@@ -175,6 +175,11 @@ export class DsonData {
             if (meta2Entry.isObject) {
                 field.type = FieldType.TYPE_OBJECT;
                 field.setNumChildren(dson.meta1Block.entries[meta2Entry.meta1BlockIdx].numDirectChildren);
+
+                if (dson.meta1Block.entries[meta2Entry.meta1BlockIdx].parentIdx != parentIdxStack.peek()) {
+                    throw new Error("Parent object not most recently parsed object");
+                }
+
                 runningObjIdx++;
             }
 
@@ -191,10 +196,12 @@ export class DsonData {
             }
 
             if (field.type != FieldType.TYPE_OBJECT) {
-                field.guessType(unhashBehavior);
+                if (!field.guessType(unhashBehavior)) {
+                    console.log(`Failed to parse field: ${field.name}`);
+                }
             }
 
-            if (JSON.stringify(field.type) == JSON.stringify(FieldType.TYPE_OBJECT)) {
+            if (field.type == FieldType.TYPE_OBJECT) {
                 fieldStack.push(field);
                 parentIdxStack.push(runningObjIdx);
             }
