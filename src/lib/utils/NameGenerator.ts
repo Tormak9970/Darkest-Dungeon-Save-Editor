@@ -17,7 +17,9 @@
  */
 
 import { fs, path } from "@tauri-apps/api";
+import { toast } from "@zerodevx/svelte-toast";
 import { Buffer } from "buffer"
+import { ToasterController } from "../controllers/ToasterController";
 
 interface Parser {
     parseFile(path:string, names:Set<string>): Promise<void>;
@@ -273,6 +275,8 @@ export class NameGenerator {
     async findNames(gameDirs:string[]):Promise<Set<string>> {
         const names = new Set<string>();
 
+		const loaderId = ToasterController.showLoaderToast("Finding names...");
+
         for (let i = 0; i < gameDirs.length; i++) {
             const dirPath = gameDirs[i];
             const files = recursiveFlatten(await fs.readDir(dirPath, { recursive: true }));
@@ -291,6 +295,12 @@ export class NameGenerator {
                 }
             }
         }
+
+		ToasterController.remLoaderToast(loaderId);
+		
+		setTimeout(() => {
+			ToasterController.showSuccessToast("All names found!");
+		}, 500);
 
         return names;
     }

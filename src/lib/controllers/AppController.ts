@@ -16,7 +16,6 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>
  */
 import { fs, path } from "@tauri-apps/api";
-import { toast } from "@zerodevx/svelte-toast";
 import { get,  } from "svelte/store";
 import { appDataDir, dsonFiles, fileNamesPath, saveDirPath, tabs } from "../../Stores";
 import { DsonFile } from "../models/DsonFile";
@@ -25,32 +24,34 @@ import { UnhashBehavior } from "../models/UnhashBehavior";
 import { Reader } from "../utils/Reader";
 import { Utils } from "../utils/Utils";
 import { GenerateNamesController } from "./GenerateNamesController";
+import { ToasterController } from "./ToasterController";
 
+/**
+ * The main controller for the application
+ */
 export class AppController {
     static namesController = new GenerateNamesController();
 
+    /**
+     * Sets up the app
+     */
     static async init() {
         const appDir = get(appDataDir);
         const backupPath = await path.join(appDir, "backups");
         // @ts-ignore
         if (!(await fs.exists( backupPath))) await fs.createDir(await path.join(appDir, "backups"));
-
-        // TODO show toast prompting user to load gameData dir
-        // toast.push("");
-
-        // TODO show toast prompting user to gen names if no cache present
-        // toast.push("");
-
-        // TODO show toast prompting user to load save dir
-        // toast.push("");
     }
 
+    /**
+     * Loads the user's save files
+     */
     static async loadSave() {
         const saveDir = get(saveDirPath);
 
         const newTabs = {};
         const newDsonFiles = {};
         if (saveDir != "") {
+            const loaderId = ToasterController.showLoaderToast("Loading save data");
             const saveConts = await fs.readDir(saveDir);
 
             for (let i = 0; i < saveConts.length; i++) {
@@ -65,28 +66,50 @@ export class AppController {
                     newDsonFiles[saveFilePath.name] = dson;
                 }
             }
+            ToasterController.remLoaderToast(loaderId);
+		
+            setTimeout(() => {
+                ToasterController.showSuccessToast("Saves loaded!");
+            }, 500);
         }
 
         tabs.set(newTabs);
         dsonFiles.set(newDsonFiles);
     }
 
+    /**
+     * Backs up the user's saves
+     */
     static async backup() {
         
     }
 
+    /**
+     * Saves the current changes
+     */
     static async saveChanges() {
 
     }
 
+    /**
+     * Discards the current changes
+     */
     static async discardChanges() {
         
     }
 
+    /**
+     * Reloads the user's saves
+     */
     static async reload() {
 
     }
 
+    /**
+     * Generates the name hashes used when loading user saves
+     * @param gamePath the gameData path
+     * @param modPath the modData path, if applicable
+     */
     static async generateNames(gamePath:string, modPath:string): Promise<void> {
         const fileNamesFilePath = get(fileNamesPath);
         const names = await AppController.namesController.generateNames(gamePath, modPath);
@@ -98,6 +121,9 @@ export class AppController {
         DsonTypes.offerNames(Array.from(names));
     }
 
+    /**
+     * Updates the in-memory hash names based on a cached file
+     */
     static async updateNames(): Promise<void> {
         const fileNamesFilePath = get(fileNamesPath);
         const names = (await fs.readTextFile(fileNamesFilePath)).split('\n');

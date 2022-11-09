@@ -30,4 +30,7 @@
     --selection-color: #3891ff7a;
 
     --success: #36ff04;
+
+    /* Toast variables */
+    --toastContainerTop: 2.5rem;
 }

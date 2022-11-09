@@ -16,7 +16,8 @@
  along with this program. If not, see <https://www.gnu.org/licenses/>
  -->
 <script lang="ts">
-    import Button from "./interactable/Button.svelte";
+    import Button from "../interactable/Button.svelte";
+    import Pane from "../layout/Pane.svelte";
 
     export let message:string;
     export let onConfirm:()=>Promise<void>;

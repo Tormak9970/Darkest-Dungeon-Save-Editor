@@ -28,3 +28,5 @@ export const unchangedTabs:Writable<{}> = writable({});
 export const dsonFiles:Writable<{}> = writable({});
 export const tabs:Writable<{}> = writable({});
 export const selectedTab = writable("");
+
+export const loaderProgress = writable("0%");

@@ -18,9 +18,9 @@
 <script lang="ts">
     import { fs, path } from "@tauri-apps/api";
     import { appWindow } from '@tauri-apps/api/window';
-    import { toast } from "@zerodevx/svelte-toast";
-    import { afterUpdate, onMount } from 'svelte';
+    import { onMount } from 'svelte';
     import { AppController } from "../lib/controllers/AppController";
+    import { ToasterController } from "../lib/controllers/ToasterController";
     import { SettingsManager } from "../lib/utils/SettingsManager";
     import { appDataDir, fileNamesPath, gameDataDirPath, modDataDirPath, saveDirPath, selectedTab } from "../Stores";
 
@@ -77,7 +77,9 @@
         if ($saveDirPath != "") {
             if ($gameDataDirPath == "") {
                 // TODO show toast to prompt user to choose directory
-                toast.push("Select a game data path")
+                ToasterController.showGenericToast("Please select a game data directory", {
+                    "--toastWidth": "400px"
+                });
             } else {
                 // @ts-ignore
                 if (!(await fs.exists($fileNamesPath)) && $gameDataDirPath != "") {
@@ -88,10 +90,6 @@
                 await AppController.loadSave();
             }
         }
-    });
-
-    afterUpdate(async () => {
-        
     });
 </script>
 

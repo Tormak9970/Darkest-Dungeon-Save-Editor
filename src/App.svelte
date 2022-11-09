@@ -24,25 +24,38 @@
 	import Titlebar from "./components/Titlebar.svelte";
     import { AppController } from "./lib/controllers/AppController";
     
-    import { gameDataDirPath, modDataDirPath, saveDirPath } from "./Stores";
+    import { gameDataDirPath, loaderProgress, modDataDirPath, saveDirPath } from "./Stores";
     import ProgressBar from "./components/info/ProgressBar.svelte";
-
-    $: loaderProgress = "0%";
+    import { ToasterController } from "./lib/controllers/ToasterController";
 
     async function loadSave(e:Event) {
-        const path = (e.currentTarget as HTMLInputElement).value;
-        $saveDirPath = path;
-        await AppController.loadSave();
+        if ($gameDataDirPath == "") {
+            ToasterController.showGenericToast("Please select a game data directory first", {
+                "--toastWidth": "360px"
+            });
+        } else {
+            const path = (e.currentTarget as HTMLInputElement).value;
+            $saveDirPath = path;
+            await AppController.loadSave();
+        }
     }
 
     async function loadGameData(e:Event) {
         const path = (e.currentTarget as HTMLInputElement).value;
         $gameDataDirPath = path;
+        
+        ToasterController.showGenericToast("Consider running find names", {
+            "--toastWidth": "270px"
+        });
     }
 
     async function loadModData(e:Event) {
         const path = (e.currentTarget as HTMLInputElement).value;
         $modDataDirPath = path;
+        
+        ToasterController.showGenericToast("Consider running find names", {
+            "--toastWidth": "270px"
+        });
     }
 
     async function confirmDiscard(e:Event) {
@@ -98,7 +111,7 @@
         </Pane>
         <Pane padding={"7px"}>
             <div class="bottom-panel">
-                <ProgressBar width={"300px"} progress={loaderProgress} />
+                <ProgressBar width={"300px"} progress={$loaderProgress} />
                 <div style="width: 7px; height: 1px;" />
                 <Button text={"Discard Changes"} onClick={confirmDiscard} width={"120px"} />
                 <div style="width: 7px; height: 1px;" />
