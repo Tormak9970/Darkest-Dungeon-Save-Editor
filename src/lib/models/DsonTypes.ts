@@ -83,20 +83,32 @@ export class FieldType {
 }
 
 export class DsonTypes {
+    private static encoder = new TextEncoder();
+    private static decoder = new TextDecoder();
     static NAME_TABLE = new Map<number, string>();
 
     static offerName(name:string): void {
-        DsonTypes.NAME_TABLE.set(Utils.stringHash(name), name);
+        DsonTypes.NAME_TABLE.set(DsonTypes.stringHash(name), name);
     }
 
     static offerNames(names:string[]): void {
         for (let i = 0; i < names.length; i++) {
             const name = names[i];
-            DsonTypes.NAME_TABLE.set(Utils.stringHash(name), name);
+            DsonTypes.NAME_TABLE.set(DsonTypes.stringHash(name), name);
         }
     }
+    
+    static stringHash(str:string): number {
+        let hash = 0;
+        const arr = DsonTypes.encoder.encode(str);
+        
+        for (let i = 0; i < arr.length; i++) {
+            hash = hash * 53 + arr[i];
+        }
 
-    // ! this may have issues, not sure
+        return hash;
+    }
+
     static isA(type:any, nameGen:ItteratorGenerator): boolean {
         const arr = nameLUT[type];
 

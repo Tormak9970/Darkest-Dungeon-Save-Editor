@@ -89,7 +89,7 @@ let GLOBAL_ENDIANNESS = true;
     }
 
     /**
-     * reads the next (length) bytes and returns a Int8 array.
+     * Reads the next (length) bytes and returns a Int8 array.
      * @param  {number} length the number of bytes to read
      * @param  {boolean} endianness whether or not to use littleEdian. Default is true.
      */
@@ -100,7 +100,7 @@ let GLOBAL_ENDIANNESS = true;
     }
 
     /**
-     * reads the next (length) bytes and returns a Uint8 array.
+     * Reads the next (length) bytes and returns a Uint8 array.
      * @param  {number} length the number of bytes to read
      * @param  {boolean} endianness whether or not to use littleEdian. Default is true.
      */
@@ -111,53 +111,53 @@ let GLOBAL_ENDIANNESS = true;
     }
 
     /**
-     * reads the next Uint of length 1
+     * Reads the next Uint of length 1
      */
     readUint8 = this.#readI('getUint8', 1)
 
     /**
-     * reads the next Uint of length 2
+     * Reads the next Uint of length 2
      * @param  {boolean} endianness whether or not to use littleEdian. Default is true.
      */
     readUint16 = this.#readI('getUint16', 2)
 
     /**
-     * reads the next Uint of length 4
+     * Reads the next Uint of length 4
      * @param  {boolean} endianness whether or not to use littleEdian. Default is true.
      */
     readUint32 = this.#readI('getUint32', 4)
 
     /**
-     * reads the next Uint of length 8
+     * Reads the next Uint of length 8
      * @param  {boolean} endianness whether or not to use littleEdian. Default is true.
      */
     readUint64 = this.#readI('getBigUint64', 8);
 
     /**
-     * reads the next Int of length 1
+     * Reads the next Int of length 1
      */
     readInt8 = this.#readI('getInt8', 1)
 
     /**
-     * reads the next Int of length 2
+     * Reads the next Int of length 2
      * @param  {boolean} endianness whether or not to use littleEdian. Default is true.
      */
     readInt16 = this.#readI('getInt16', 2)
 
     /**
-     * reads the next Int of length 4
+     * Reads the next Int of length 4
      * @param  {boolean} endianness whether or not to use littleEdian. Default is true.
      */
     readInt32 = this.#readI('getInt32', 4)
 
     /**
-     * reads the next Int of length 8
+     * Reads the next Int of length 8
      * @param  {boolean} endianness whether or not to use littleEdian. Default is true.
      */
     readInt64 = this.#readI('getBigInt64', 8)
 
     /**
-     * reads the next Float of length 2
+     * Reads the next Float of length 2
      * @param  {boolean} endianness whether or not to use littleEdian. Default is true.
      */
     readFloat16(endianness: boolean = true) {
@@ -167,19 +167,19 @@ let GLOBAL_ENDIANNESS = true;
     }
 
     /**
-     * reads the next Float of length 4
+     * Reads the next Float of length 4
      * @param  {boolean} endianness whether or not to use littleEdian. Default is true.
      */
     readFloat32 = this.#readI('getFloat32', 4)
 
     /**
-     * reads the next Float of length 4
+     * Reads the next Float of length 4
      * @param  {boolean} endianness whether or not to use littleEdian. Default is true.
      */
     readFloat64 = this.#readI('getFloat64', 8)
 
     /**
-     * reads the next null terminated string.
+     * Reads the next null terminated string.
      * @param  {number} length optional length of the string. Reads until 00 byte if undefined.
      */
     readString(length?: number) {

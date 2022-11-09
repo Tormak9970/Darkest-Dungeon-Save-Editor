@@ -17,21 +17,8 @@
  */
 
 export class Utils {
-    private static encoder = new TextEncoder();
-    private static decoder = new TextDecoder();
     private static saveRegexA = new RegExp(".*persist\\..*\\.json");
     private static saveRegexB = new RegExp("novelty_tracker\\.json");
-    
-    static stringHash(str:string): number {
-        let hash = 0;
-        const arr = Utils.encoder.encode(str);
-        
-        for (let i = 0; i < arr.length; i++) {
-            hash = hash * 53 + arr[i];
-        }
-
-        return hash;
-    }
 
     static isSaveFile(fileName:string):boolean {
         return Utils.saveRegexA.test(fileName) || Utils.saveRegexB.test(fileName);

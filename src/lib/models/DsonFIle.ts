@@ -39,7 +39,9 @@ export class DsonHeader {
     dataLength:number;
     dataOffset:number;
 
-    constructor(reader:Reader) {
+    constructor() {}
+
+    parse(reader:Reader) {
         this.magicNr = reader.readUint32();
         if (this.magicNr != MAGIC_NUMBER) throw new Error(`Expected magic number to be ${MAGIC_NUMBER} but was ${this.magicNr}`);
 
@@ -73,20 +75,25 @@ export class DsonHeader {
 export class DsonMeta1Block {
     entries:DsonMeta1BlockEntry[] = [];
 
-    constructor(reader:Reader, header:DsonHeader) {
+    constructor() {}
+
+    parse(reader:Reader, header:DsonHeader) {
         for (let i = 0; i < header.numMeta1Entries; i++) {
-            const entry = new DsonMeta1BlockEntry(reader);
+            const entry = new DsonMeta1BlockEntry();
+            entry.parse(reader);
             this.entries.push(entry);
         }
     }
 }
-class DsonMeta1BlockEntry {
+export class DsonMeta1BlockEntry {
     parentIdx:number; //-1 means root
     meta2EntryIdx:number;
     numDirectChildren:number;
     numAllChildren:number;
 
-    constructor(reader:Reader) {
+    constructor() {}
+
+    parse(reader:Reader) {
         this.parentIdx = reader.readInt32();
         this.meta2EntryIdx = reader.readUint32();
         this.numDirectChildren = reader.readUint32();
@@ -98,9 +105,12 @@ class DsonMeta1BlockEntry {
 export class DsonMeta2Block {
     entries:DsonMeta2BlockEntry[] = [];
 
-    constructor(reader:Reader, header:DsonHeader) {
+    constructor() {}
+
+    parse(reader:Reader, header:DsonHeader) {
         for (let i = 0; i < header.numMeta2Entries; i++) {
-            const entry = new DsonMeta2BlockEntry(reader);
+            const entry = new DsonMeta2BlockEntry();
+            entry.parse(reader);
             this.entries.push(entry);
         }
     }
@@ -118,7 +128,7 @@ export class DsonMeta2Block {
         return bestOffset;
     }
 }
-class DsonMeta2BlockEntry {
+export class DsonMeta2BlockEntry {
     nameHash:number;
     offset:number; //offset in data block relative to the dataOffset
     fieldInfo:number;
@@ -126,7 +136,9 @@ class DsonMeta2BlockEntry {
     nameLen:number; //name length with 0
     meta1BlockIdx:number;
 
-    constructor(reader:Reader) {
+    constructor() {}
+
+    parse(reader:Reader) {
         this.nameHash = reader.readUint32();
         this.offset = reader.readUint32();
         this.fieldInfo = reader.readUint32();
@@ -141,7 +153,9 @@ const decoder = new TextDecoder();
 export class DsonData {
     rootFields:DsonField[];
     
-    constructor(reader:Reader, dson:DsonFile, unhashBehavior:UnhashBehavior) {
+    constructor() {}
+
+    parse(reader:Reader, dson:DsonFile, unhashBehavior:UnhashBehavior) {
         const fieldStack = new Stack();
         const parentIdxStack = new Stack();
 
@@ -276,16 +290,20 @@ export class DsonFile {
     data:DsonData
 
     constructor(reader:Reader, behavior:UnhashBehavior) {
-        this.header = new DsonHeader(reader);
+        this.header = new DsonHeader();
+        this.header.parse(reader);
 
         reader.seek(this.header.meta1Offset);
-        this.meta1Block = new DsonMeta1Block(reader, this.header);
+        this.meta1Block = new DsonMeta1Block();
+        this.meta1Block.parse(reader, this.header);
         
         reader.seek(this.header.meta2Offset);
-        this.meta2Block = new DsonMeta2Block(reader, this.header);
+        this.meta2Block = new DsonMeta2Block();
+        this.meta2Block.parse(reader, this.header);
 
         reader.seek(this.header.dataOffset);
-        this.data = new DsonData(new Reader(reader.data.slice(this.header.dataOffset, this.header.dataOffset + this.header.dataLength)), this, behavior);
+        this.data = new DsonData();
+        this.data.parse(new Reader(reader.data.slice(this.header.dataOffset, this.header.dataOffset + this.header.dataLength)), this, behavior);
     }
 
     asJson(): Object {

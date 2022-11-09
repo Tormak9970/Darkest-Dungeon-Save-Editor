@@ -20,6 +20,8 @@ import { Float16Array } from "@petamoriken/float16";
 
 let GLOBAL_ENDIANNESS = true;
 
+const encoder = new TextEncoder();
+
 export class Writer {
     data: ArrayBuffer;
     offset: number;
@@ -214,23 +216,19 @@ export class Writer {
     writeFloat64 = this.#writeI('setFloat64', 8);
 
     /**
-     * Writes the provided string to the current offset, followed by null
-     * @param {string} str the string to write
-     * @param  {boolean} endianness whether or not to use littleEdian. Default is true.
-     * @returns the number of bytes written
-     */
-    writeNullTermString(str:string, endianness: boolean = true): number {
-
-    }
-
-    /**
      * Writes the provided string to the current offset, prefixed by the length as an Int32
      * @param {string} str the string to write
      * @param  {boolean} endianness whether or not to use littleEdian. Default is true.
      * @returns the number of bytes written
      */
     writeLenPrefixString(str:string, endianness: boolean = true): number {
+        const length = str.length;
+        this.writeUint32(length, endianness);
+        
+        const strBytes = encoder.encode(str);
+        this.writeUnsignedBytes(strBytes, endianness);
 
+        return 4 + strBytes.length;
     }
 
     /**
@@ -240,6 +238,11 @@ export class Writer {
      * @returns the number of bytes written
      */
     write00PaddedString(str:string, endianness: boolean = true): number {
+        const strBytes = encoder.encode(str);
+        this.writeUnsignedBytes(strBytes, endianness);
 
+        this.writeUint8(0x00, endianness);
+
+        return strBytes.length + 1;
     }
 }
