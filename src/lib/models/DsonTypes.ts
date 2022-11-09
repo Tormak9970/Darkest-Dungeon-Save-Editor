@@ -1,5 +1,4 @@
-import { Utils } from "../utils/Utils";
-import type { ItteratorGenerator } from "./DsonField";
+import type { ItteratorGenerator, Itterator } from "../utils/Utils";
 
 const nameLUT = {
     '2': [

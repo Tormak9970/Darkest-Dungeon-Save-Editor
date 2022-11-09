@@ -156,8 +156,8 @@ export class DsonData {
     constructor() {}
 
     parse(reader:Reader, dson:DsonFile, unhashBehavior:UnhashBehavior) {
-        const fieldStack = new Stack();
-        const parentIdxStack = new Stack();
+        const fieldStack = new Stack<DsonField>();
+        const parentIdxStack = new Stack<number>();
 
         let runningObjIdx = -1;
         parentIdxStack.push(runningObjIdx);

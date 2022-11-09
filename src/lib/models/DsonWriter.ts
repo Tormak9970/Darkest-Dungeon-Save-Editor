@@ -16,10 +16,12 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>
  */
 
-import { Stack } from "../utils/Utils";
+import GrowableInt8Array from "../externals/GrowableInt8Array.";
+
+import { getNameIttr, Stack } from "../utils/Utils";
 import { Writer } from "../utils/Writer";
 import { DsonHeader, DsonMeta1BlockEntry, DsonMeta2BlockEntry, MAGIC_NUMBER } from "./DsonFile";
-import { DsonTypes } from "./DsonTypes";
+import { DsonTypes, FieldType } from "./DsonTypes";
 
 function concatBuffs(buffArr:ArrayBuffer[]): ArrayBuffer {
     let res = new Uint8Array(buffArr[0]);
@@ -44,8 +46,8 @@ export class DsonWriter {
     private buffArr:ArrayBuffer[]
     data:ArrayBuffer;
     meta1Entries:DsonMeta1BlockEntry[];
-    parentIdxStack:Stack;
-    nameStack:Stack;
+    parentIdxStack:Stack<number>;
+    nameStack:Stack<string>;
     meta2Entries:DsonMeta2BlockEntry[];
 
     constructor(json:object) {
@@ -83,8 +85,53 @@ export class DsonWriter {
         this.parentIdxStack.pop();
     }
 
-    private writeField(name:string, data:Object): void {
+    private writeField(name:string, json:any): void {
+        const meta2Entr = new DsonMeta2BlockEntry();
+        meta2Entr.nameHash = DsonTypes.stringHash(name);
+        const nameBytes = encoder.encode(name);
+        meta2Entr.fieldInfo = ((nameBytes.length + 1) & 0b111111111) << 2;
+        this.meta2Entries.push(meta2Entr);
 
+        const buff = new ArrayBuffer(500);
+        const writer = new Writer(buff);
+
+        if (typeof json == "object") {
+
+        } else {
+            // write data based on type
+            this.nameStack.push(name);
+
+            if (DsonTypes.isA(FieldType.TYPE_FLOATARRAY, getNameIttr(this.nameStack))) {
+
+            } else if (DsonTypes.isA(FieldType.TYPE_INTVECTOR, getNameIttr(this.nameStack))) {
+
+            } else if (DsonTypes.isA(FieldType.TYPE_STRINGVECTOR, getNameIttr(this.nameStack))) {
+
+            } else if (DsonTypes.isA(FieldType.TYPE_FLOAT, getNameIttr(this.nameStack))) {
+
+            } else if (DsonTypes.isA(FieldType.TYPE_TWOINT, getNameIttr(this.nameStack))) {
+
+            } else if (DsonTypes.isA(FieldType.TYPE_CHAR, getNameIttr(this.nameStack))) {
+
+            } else if (typeof json == "number") {
+                this.align(writer);
+                writer.writeSignedBytes(new Int8Array(this.intBytes(json as number)));
+            } else if (typeof json == "string") {
+                this.align(writer);
+                writer.writeSignedBytes(new Int8Array(this.stringBytes(json as string)));
+            } else if (Array.isArray(json)) {
+
+            } else if (typeof json == "boolean") {
+                writer.writeByte(json as boolean ? 0x01 : 0x00);
+            } else {
+                throw new Error("Cant figure out the type of " + name);
+            }
+
+            this.nameStack.pop();
+        }
+
+        meta2Entr.offset = this.getCurrentDataSize();
+        this.buffArr.push(this.trimWriter(writer));
     }
 
     private floatBytes(float:number): ArrayBuffer {
@@ -160,7 +207,20 @@ export class DsonWriter {
         return writer.data;
     }
 
+    private trimWriter(writer:Writer): ArrayBuffer {
+        return writer.data.slice(0, writer.offset+1);
+    }
+
+    private getCurrentDataSize(curBuff?:ArrayBuffer) {
+        let size = 0;
+        this.buffArr.forEach((buf) => {
+            size += buf.byteLength;
+        });
+        if (curBuff) size += curBuff.byteLength;
+        return size;
+    }
+
     private align(writer:Writer): void {
-        writer.writeUint8()
+        writer.writeUnsignedBytes(new Uint8Array((4 - (this.data.byteLength % 4)) % 4));
     }
 }

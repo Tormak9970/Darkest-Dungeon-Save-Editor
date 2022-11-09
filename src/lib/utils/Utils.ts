@@ -41,12 +41,59 @@ export function throttle(func:any, wait:number) {
     };
 }
 
-export class Stack {
-    private stack:any[] = [];
+export interface ItteratorGenerator {
+    get():Itterator;
+}
+
+export interface Itterator {
+    hasNext():boolean;
+    next():string;
+}
+
+class NameItteratorGenerator implements ItteratorGenerator {
+    private stack:Stack<string>;
+
+    constructor(stack:Stack<string>) {
+        this.stack = stack;
+    }
+
+    get() {
+        return new NameItterator(this.stack);
+    }
+}
+
+class NameItterator implements Itterator {
+    private stack:Stack<string>;
+    private curIdx:number;
+
+    constructor(stack:Stack<string>) {
+        this.stack = stack;
+        this.curIdx = stack.size() - 1;
+    }
+    hasNext():boolean {
+        return this.curIdx >= 0;
+    }
+    next():string {
+        const f = this.stack.get(this.curIdx);
+        this.curIdx--;
+        return f;
+    }
+}
+
+export function getNameIttr(stack:Stack<string>) {
+    return new NameItteratorGenerator(stack);
+}
+
+export class Stack<T> {
+    private stack:T[] = [];
 
     constructor() {}
 
-    push(obj:any) { this.stack.push(obj); }
+    get(idx:number) { return this.stack[idx]; }
+
+    size() { return this.stack.length; }
+
+    push(obj:T) { this.stack.push(obj); }
 
     peek() { return this.stack[this.stack.length-1]; }
 

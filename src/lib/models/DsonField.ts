@@ -16,6 +16,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>
  */
 import { Reader } from "../utils/Reader";
+import type { Itterator, ItteratorGenerator } from "../utils/Utils";
 import { DsonFile, MAGIC_NUMBER } from "./DsonFile";
 import { DsonTypes, FieldType } from "./DsonTypes";
 import { UnhashBehavior } from "./UnhashBehavior";
@@ -318,11 +319,11 @@ export class DsonField {
     hasAllChildren(): boolean { return this.children.length == this.numChildren; }
 
     private nameIterator() {
-        return new ItteratorGenerator(this);
+        return new FieldItteratorGenerator(this);
     }
 }
 
-export class ItteratorGenerator {
+class FieldItteratorGenerator implements ItteratorGenerator {
     private field:{name:string, parent:DsonField};
 
     constructor(field:DsonField) {
@@ -330,11 +331,11 @@ export class ItteratorGenerator {
     }
 
     get() {
-        return new Itterator(this.field);
+        return new FieldItterator(this.field);
     }
 }
 
-export class Itterator {
+class FieldItterator implements Itterator {
     private field:{name:string, parent:DsonField};
 
     constructor(field:{name:string, parent:DsonField}) {
