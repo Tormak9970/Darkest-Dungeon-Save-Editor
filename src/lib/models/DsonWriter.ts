@@ -133,12 +133,34 @@ export class DsonWriter {
         writer.writeUint32(0); //zeroes3
 
         writer.writeUint32(this.header.numMeta2Entries);
-        writer.writeUint32(this.header.meta2Offset)
+        writer.writeUint32(this.header.meta2Offset);
+        
+        writer.writeUint32(0); //zeroes4
+
+        writer.writeUint32(this.header.dataLength);
+        writer.writeUint32(this.header.dataOffset);
+
+        for (let i = 0; i < this.meta1Entries.length; i++) {
+            const entr = this.meta1Entries[i];
+            writer.writeUint32(entr.parentIdx);
+            writer.writeUint32(entr.meta2EntryIdx);
+            writer.writeUint32(entr.numDirectChildren);
+            writer.writeUint32(entr.numAllChildren);
+        }
+
+        for (let i = 0; i < this.meta2Entries.length; i++) {
+            const entr = this.meta2Entries[i];
+            writer.writeUint32(entr.nameHash);
+            writer.writeUint32(entr.offset);
+            writer.writeUint32(entr.fieldInfo);
+        }
+
+        writer.writeUnsignedBytes(new Uint8Array(this.data));
 
         return writer.data;
     }
 
-    private align(): void {
-
+    private align(writer:Writer): void {
+        writer.writeUint8()
     }
 }
