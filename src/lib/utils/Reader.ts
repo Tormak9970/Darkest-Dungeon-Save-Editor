@@ -89,7 +89,7 @@ let GLOBAL_ENDIANNESS = true;
     }
 
     /**
-     * reads the next (length) bytes and returns a Uint8 array.
+     * reads the next (length) bytes and returns a Int8 array.
      * @param  {number} length the number of bytes to read
      * @param  {boolean} endianness whether or not to use littleEdian. Default is true.
      */

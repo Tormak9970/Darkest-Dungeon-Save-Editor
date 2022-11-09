@@ -37,12 +37,12 @@ export class Writer {
         return (data as Uint8Array).buffer !== undefined;
     }
 
-    #writeI(method: keyof DataView): (data:ArrayBufferLike, endianness?: boolean) => number {
-        return (data:ArrayBufferLike, endianness?: boolean) => {
+    #writeI(method: keyof DataView, length:number): (data:any, endianness?: boolean) => number {
+        return (data:any, endianness?: boolean) => {
             // @ts-ignore
             this.view[method](this.offset, data, endianness ? endianness : GLOBAL_ENDIANNESS);
-            this.offset += data.byteLength;
-            return data.byteLength;
+            this.offset += length;
+            return length;
         }
     }
 
@@ -64,18 +64,18 @@ export class Writer {
     }
 
     /**
-     * Returns the number of bytes left in the reader
-     * @returns the number of bytes left in the reader
+     * Returns the number of bytes left in the Writer
+     * @returns the number of bytes left in the Writer
      */
     remaining(): number {
         return this.length - this.offset;
     }
 
     /**
-     * read the next byte and return a Uint8 array.
+     * Write a byte to the current offset.
      * @param  {boolean} endianness whether or not to use littleEdian. Default is true.
      */
-    writeByte = this.#writeI('setInt8');
+    writeByte = this.#writeI('setInt8', 1);
 
     /**
      * Writes the provide char to the current offset of the Writer. Returns the number of bytes written
@@ -84,76 +84,162 @@ export class Writer {
      * @returns the number of bytes written
      */
     writeChar(data:string, endianness?: boolean) {
-        return this.#writeI('setInt8')(new Int8Array([data.charCodeAt(0)]), endianness);
+        return this.#writeI('setInt8', 1)(data.charCodeAt(0), endianness);
     }
 
-    
-    readSignedBytes(length: number, endianness?: boolean) {
-        const res = new Int8Array(this.data, this.offset, length);
-        this.offset += length;
-        return (endianness ? endianness : GLOBAL_ENDIANNESS) ? res : res.reverse();
+    /**
+     * Writes the signed data to the current offset.
+     * @param  {Int8Array} data the data to write
+     * @param  {boolean} endianness whether or not to use littleEdian. Default is true.
+     */
+    writeSignedBytes(data:Int8Array, endianness?: boolean) {
+        const nDat = new Int8Array(this.data);
+        nDat.set((endianness ? endianness : GLOBAL_ENDIANNESS) ? data : data.reverse(), this.offset);
+        this.data = nDat.buffer
+        this.view = new DataView(this.data);
+        this.offset += data.length;
+        return data.length;
     }
 
-    
-    readUnsignedBytes(length: number, endianness?: boolean) {
-        const res = new Uint8Array(this.data, this.offset, length);
-        this.offset += length;
-        return (endianness ? endianness : GLOBAL_ENDIANNESS) ? res : res.reverse();
+    /**
+     * Writes the unsigned data to the current offset.
+     * @param  {Uint8Array} data the data to write
+     * @param  {boolean} endianness whether or not to use littleEdian. Default is true.
+     */
+    writeUnsignedBytes(data:Uint8Array, endianness?: boolean) {
+        const nDat = new Uint8Array(this.data);
+        nDat.set((endianness ? endianness : GLOBAL_ENDIANNESS) ? data : data.reverse(), this.offset);
+        this.data = nDat.buffer
+        this.view = new DataView(this.data);
+        this.offset += data.length;
+        return data.length;
     }
 
-    
-    readUint8 = this.#readI('getUint8', 1)
+    /**
+     * Writes the provided Uint8 to the current offset
+     * @param {number} data the number to write
+     * @param  {boolean} endianness whether or not to use littleEdian. Default is true.
+     * @returns the number of bytes written
+     */
+    writeUint8 = this.#writeI('setUint8', 1);
 
-    
-    readUint16 = this.#readI('getUint16', 2)
+    /**
+     * Writes the provided Uint16 to the current offset
+     * @param {number} data the number to write
+     * @param  {boolean} endianness whether or not to use littleEdian. Default is true.
+     * @returns the number of bytes written
+     */
+    writeUint16 = this.#writeI('setUint16', 2);
 
-    
-    readUint32 = this.#readI('getUint32', 4)
+    /**
+     * Writes the provided Uint32 to the current offset
+     * @param {number} data the number to write
+     * @param  {boolean} endianness whether or not to use littleEdian. Default is true.
+     * @returns the number of bytes written
+     */
+    writeUint32 = this.#writeI('setUint32', 4);
 
-    
-    readUint64 = this.#readI('getBigUint64', 8);
+    /**
+     * Writes the provided BigUint64 to the current offset
+     * @param {number} data the number to write
+     * @param  {boolean} endianness whether or not to use littleEdian. Default is true.
+     * @returns the number of bytes written
+     */
+    writeUint64 = this.#writeI('setBigUint64', 8);
 
-    
-    readInt8 = this.#readI('getInt8', 1)
+    /**
+     * Writes the provided Int8 to the current offset
+     * @param {number} data the number to write
+     * @param  {boolean} endianness whether or not to use littleEdian. Default is true.
+     * @returns the number of bytes written
+     */
+    writeInt8 = this.#writeI('setInt8', 1);
 
-    
-    readInt16 = this.#readI('getInt16', 2)
+    /**
+     * Writes the provided Int16 to the current offset
+     * @param {number} data the number to write
+     * @param  {boolean} endianness whether or not to use littleEdian. Default is true.
+     * @returns the number of bytes written
+     */
+    writeInt16 = this.#writeI('setInt16', 2);
 
-    
-    readInt32 = this.#readI('getInt32', 4)
+    /**
+     * Writes the provided Int32 to the current offset
+     * @param {number} data the number to write
+     * @param  {boolean} endianness whether or not to use littleEdian. Default is true.
+     * @returns the number of bytes written
+     */
+    writeInt32 = this.#writeI('setInt32', 4);
 
-    
-    readInt64 = this.#readI('getBigInt64', 8)
+    /**
+     * Writes the provided BigInt64 to the current offset
+     * @param {number} data the number to write
+     * @param  {boolean} endianness whether or not to use littleEdian. Default is true.
+     * @returns the number of bytes written
+     */
+    writeInt64 = this.#writeI('setBigInt64', 8);
 
-    
-    readFloat16(endianness: boolean = true) {
-        const res = new Float16Array(this.data, this.offset, 1);
+    /**
+     * Writes the provided Float16 to the current offset
+     * @param {number} data the number to write
+     * @param  {boolean} endianness whether or not to use littleEdian. Default is true.
+     * @returns the number of bytes written
+     */
+    writeFloat16(data:number, endianness: boolean = true) {
+        const res = new Float16Array([data]);
+
+        const nDat = new Float16Array(this.data);
+        nDat.set((endianness ? endianness : GLOBAL_ENDIANNESS) ? res : res.reverse(), this.offset);
+        this.data = nDat.buffer
+        this.view = new DataView(this.data);
+
         this.offset += 2;
-        return (endianness ? endianness : GLOBAL_ENDIANNESS) ? res[0] : res.reverse()[0];
+        return 1;
     }
 
-    
-    readFloat32 = this.#readI('getFloat32', 4)
+    /**
+     * Writes the provided Float32 to the current offset
+     * @param {number} data the number to write
+     * @param  {boolean} endianness whether or not to use littleEdian. Default is true.
+     * @returns the number of bytes written
+     */
+    writeFloat32 = this.#writeI('setFloat32', 4);
 
-    
-    readFloat64 = this.#readI('getFloat64', 8)
+    /**
+     * Writes the provided Float64 to the current offset
+     * @param {number} data the number to write
+     * @param  {boolean} endianness whether or not to use littleEdian. Default is true.
+     * @returns the number of bytes written
+     */
+    writeFloat64 = this.#writeI('setFloat64', 8);
 
-    
-    readString(length?: number) {
-        let outString = '';
-        if (length === undefined) {
-            let curChar = new Uint8Array(this.data, this.offset++, 1)[0];
-            while (curChar !== 0) {
-                outString += String.fromCharCode(curChar);
-                curChar = new Uint8Array(this.data, this.offset++, 1)[0];
-            }
-        } else {
-            for (let i = 0; i < length; i++) {
-                const curChar = new Uint8Array(this.data, this.offset++, 1)[0];
-                if (curChar === 0) break;
-                outString += String.fromCharCode(curChar);
-            }
-        }
-        return outString;
+    /**
+     * Writes the provided string to the current offset, followed by null
+     * @param {string} str the string to write
+     * @param  {boolean} endianness whether or not to use littleEdian. Default is true.
+     * @returns the number of bytes written
+     */
+    writeNullTermString(str:string, endianness: boolean = true): number {
+
+    }
+
+    /**
+     * Writes the provided string to the current offset, prefixed by the length as an Int32
+     * @param {string} str the string to write
+     * @param  {boolean} endianness whether or not to use littleEdian. Default is true.
+     * @returns the number of bytes written
+     */
+    writeLenPrefixString(str:string, endianness: boolean = true): number {
+
+    }
+
+    /**
+     * Writes the provided string to the current offset, followed by a 0x00 byte
+     * @param {string} str the string to write
+     * @param  {boolean} endianness whether or not to use littleEdian. Default is true.
+     * @returns the number of bytes written
+     */
+    write00PaddedString(str:string, endianness: boolean = true): number {
+
     }
 }
