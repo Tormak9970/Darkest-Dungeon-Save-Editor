@@ -20,7 +20,7 @@ import GrowableInt8Array from "../externals/GrowableInt8Array.";
 
 import { getNameIttr, Stack } from "../utils/Utils";
 import { Writer } from "../utils/Writer";
-import { DsonHeader, DsonMeta1BlockEntry, DsonMeta2BlockEntry, MAGIC_NUMBER } from "./DsonFile";
+import { DsonHeader, DsonMeta1Block, DsonMeta1BlockEntry, DsonMeta2BlockEntry, MAGIC_NUMBER } from "./DsonFile";
 import { DsonTypes, FieldType } from "./DsonTypes";
 
 function concatBuffs(buffArr:ArrayBuffer[]): ArrayBuffer {
@@ -49,10 +49,12 @@ export class DsonWriter {
     parentIdxStack:Stack<number>;
     nameStack:Stack<string>;
     meta2Entries:DsonMeta2BlockEntry[];
+    revision:number;
 
-    constructor(json:object) {
+    constructor(json:object, revision:number) {
         this.header = new DsonHeader();
         this.buffArr = [];
+        this.revision = revision;
 
         this.header.headerLength = 0x40;
         this.header.meta1Offset = 0x40;
@@ -90,12 +92,46 @@ export class DsonWriter {
         meta2Entr.fieldInfo = ((nameBytes.length + 1) & 0b111111111) << 2;
         this.meta2Entries.push(meta2Entr);
 
-        const buff = new ArrayBuffer(500);
+        const buff = new ArrayBuffer(10000);
         const writer = new Writer(buff);
 
-        // TODO validate the non object writing
-        if (typeof json == "object") {
+        meta2Entr.offset = this.getCurrentDataSize();
+        writer.writeUnsignedBytes(new Uint8Array(nameBytes));
+        writer.writeByte(0x00);
 
+        // TODO validate both object and non object writing
+        if (typeof json == "object") {
+            if (name != "raw_data" && name != "static_save") {
+                this.buffArr.push(this.trimWriter(writer));
+
+                const meta1Entr = new DsonMeta1BlockEntry();
+                meta1Entr.meta2EntryIdx = this.meta2Entries.length - 1;
+                meta2Entr.fieldInfo |= 0b1 | ((this.meta1Entries.length & 0b11111111111111111111) << 11);
+                meta1Entr.parentIdx = this.parentIdxStack.peek();
+                this.meta1Entries.push(meta1Entr);
+
+                const prevNumChld = this.meta2Entries.length;
+                this.parentIdxStack.push(this.meta1Entries.length - 1);
+                this.nameStack.push(name);
+                meta1Entr.numDirectChildren = Object.values(json).length;
+
+                const children = Object.entries(json);
+                for (let i = 0; i < meta1Entr.numDirectChildren; i++) {
+                    const kvp = children[i];
+                    this.writeField(kvp[0], kvp[1]);
+                }
+
+                this.nameStack.pop();
+                this.parentIdxStack.pop();
+                meta1Entr.numAllChildren = this.meta2Entries.length - prevNumChld;
+            } else {
+                const subFile = new DsonWriter(json, this.revision);
+                this.align(writer);
+                const embededData = subFile.bytes();
+                writer.writeInt32(embededData.byteLength);
+                writer.writeSignedBytes(new Int8Array(embededData));
+                this.buffArr.push(this.trimWriter(writer));
+            }
         } else {
             // write data based on type
             this.nameStack.push(name);
@@ -171,10 +207,8 @@ export class DsonWriter {
             }
 
             this.nameStack.pop();
+            this.buffArr.push(this.trimWriter(writer));
         }
-
-        meta2Entr.offset = this.getCurrentDataSize();
-        this.buffArr.push(this.trimWriter(writer));
     }
 
     private floatBytes(float:number): ArrayBuffer {
@@ -203,12 +237,12 @@ export class DsonWriter {
         return writer.data;
     }
     
-    bytes(revision:number): ArrayBuffer {
+    bytes(): ArrayBuffer {
         const writer = new Writer(new Int8Array(0x40 + this.meta1Entries.length * 0x10 + this.meta2Entries.length * 0x0C + this.data.byteLength));
 
         writer.writeUint32(MAGIC_NUMBER);
         writer.writeUint16(0);
-        writer.writeUint16(revision); //epsilon values
+        writer.writeUint16(this.revision); //epsilon values
         writer.writeUint32(this.header.headerLength);
 
         writer.writeUint32(0); //zeroes
