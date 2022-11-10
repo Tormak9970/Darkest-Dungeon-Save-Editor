@@ -63,7 +63,6 @@ export class DsonWriter {
         this.nameStack = new Stack();
         this.parentIdxStack.push(-1);
 
-
         const jsonEntries = Object.entries(json);
         for (let i = 0; i < jsonEntries.length; i++) {
             const entr = jsonEntries[i];
@@ -72,7 +71,6 @@ export class DsonWriter {
 
             this.writeField(name, data);
         }
-
 
         this.data = concatBuffs(this.buffArr);
 
@@ -95,6 +93,7 @@ export class DsonWriter {
         const buff = new ArrayBuffer(500);
         const writer = new Writer(buff);
 
+        // TODO validate the non object writing
         if (typeof json == "object") {
 
         } else {
@@ -102,17 +101,55 @@ export class DsonWriter {
             this.nameStack.push(name);
 
             if (DsonTypes.isA(FieldType.TYPE_FLOATARRAY, getNameIttr(this.nameStack))) {
-
+                this.align(writer);
+                for (let i = 0; i < json.length; i++) {
+                    writer.writeUnsignedBytes(new Uint8Array(this.floatBytes(json[i])));
+                }
             } else if (DsonTypes.isA(FieldType.TYPE_INTVECTOR, getNameIttr(this.nameStack))) {
+                this.align(writer);
 
+                const vecData = new Writer(new Uint8Array(1000));
+
+                for (let i = 0; i < json.length; i++) {
+                    if (typeof json[i] == "string") {
+                        if (!json[i].startsWith("###")) {
+                            throw new Error("Expected hashed string");
+                        } else {
+                            vecData.writeUnsignedBytes(new Uint8Array(this.stringBytes(json[i])));
+                        }
+                    } else {
+                        vecData.writeUint32(json[i]);
+                    }
+                }
+                
+                writer.writeInt32(json.length);
+                writer.writeUnsignedBytes(new Uint8Array(this.trimWriter(vecData)));
             } else if (DsonTypes.isA(FieldType.TYPE_STRINGVECTOR, getNameIttr(this.nameStack))) {
+                this.align(writer);
 
+                const vecData = new Writer(new Uint8Array(1000));
+
+                for (let i = 0; i < json.length; i++) {
+                    const str = json[i];
+                    vecData.writeUint32((4 - (vecData.offset % 4)) % 4);
+                    vecData.writeUnsignedBytes(new Uint8Array(this.stringBytes(str)));
+                }
+                
+                writer.writeInt32(json.length);
+                writer.writeUnsignedBytes(new Uint8Array(this.trimWriter(vecData)));
             } else if (DsonTypes.isA(FieldType.TYPE_FLOAT, getNameIttr(this.nameStack))) {
-
+                this.align(writer);
+                writer.writeSignedBytes(new Int8Array(this.floatBytes(json as number)));
             } else if (DsonTypes.isA(FieldType.TYPE_TWOINT, getNameIttr(this.nameStack))) {
-
+                this.align(writer);
+                if (typeof json[0] == "number" && typeof json[1] == "number") {
+                    writer.writeInt32(json[0]);
+                    writer.writeInt32(json[1]);
+                } else {
+                    throw new Error(`Expected ${name} field value to be a TWO_BOOL array`)
+                }
             } else if (DsonTypes.isA(FieldType.TYPE_CHAR, getNameIttr(this.nameStack))) {
-
+                writer.writeByte((json as string).charCodeAt(0));
             } else if (typeof json == "number") {
                 this.align(writer);
                 writer.writeSignedBytes(new Int8Array(this.intBytes(json as number)));
@@ -120,7 +157,13 @@ export class DsonWriter {
                 this.align(writer);
                 writer.writeSignedBytes(new Int8Array(this.stringBytes(json as string)));
             } else if (Array.isArray(json)) {
-
+                this.align(writer);
+                if ((json[0] == true || json[0] == false) && (json[1] == true || json[1] == false)) {
+                    writer.writeByte(json[0] as boolean ? 0x01 : 0x00);
+                    writer.writeByte(json[1] as boolean ? 0x01 : 0x00);
+                } else {
+                    throw new Error(`Expected ${name} field value to be a TWO_BOOL array`)
+                }
             } else if (typeof json == "boolean") {
                 writer.writeByte(json as boolean ? 0x01 : 0x00);
             } else {
