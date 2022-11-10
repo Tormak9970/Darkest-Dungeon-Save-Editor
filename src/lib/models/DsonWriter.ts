@@ -41,17 +41,16 @@ const encoder = new TextEncoder();
 export class DsonWriter {
     header:DsonHeader;
     private buffArr:ArrayBuffer[]
-    data:Uint8Array;
+    data:Writer;
     meta1Entries:DsonMeta1BlockEntry[];
     parentIdxStack:Stack<number>;
     nameStack:Stack<string>;
     meta2Entries:DsonMeta2BlockEntry[];
     revision:number;
 
-    // ? validated
     constructor(json:object, revision:number) {
         this.header = new DsonHeader();
-        this.buffArr = [];
+        this.data = new Writer(new Uint8Array(10000));
         this.revision = revision;
 
         this.header.headerLength = 0x40;
@@ -72,7 +71,7 @@ export class DsonWriter {
             this.writeField(name, data);
         }
 
-        this.data = concatBuffs(this.buffArr);
+        this.data.trim();
 
         this.header.numMeta1Entries = this.meta1Entries.length;
         this.header.meta1Size = this.header.numMeta1Entries << 4;
@@ -90,18 +89,13 @@ export class DsonWriter {
         meta2Entr.fieldInfo = ((nameBytes.length + 1) & 0b111111111) << 2;
         this.meta2Entries.push(meta2Entr);
 
-        const buff = new ArrayBuffer(10000);
-        const writer = new Writer(buff);
-
-        meta2Entr.offset = this.getCurrentDataSize();
-        writer.writeUnsignedBytes(new Uint8Array(nameBytes));
-        writer.writeByte(0x00);
+        meta2Entr.offset = this.data.offset;
+        this.data.writeUnsignedBytes(new Uint8Array(nameBytes));
+        this.data.writeByte(0x00);
 
         // TODO validate both object and non object writing
         if (typeof json == "object") {
             if (name != "raw_data" && name != "static_save") {
-                this.buffArr.push(this.trimWriter(writer));
-
                 const meta1Entr = new DsonMeta1BlockEntry();
                 meta1Entr.meta2EntryIdx = this.meta2Entries.length - 1;
                 meta2Entr.fieldInfo |= 0b1 | ((this.meta1Entries.length & 0b11111111111111111111) << 11);
@@ -124,23 +118,22 @@ export class DsonWriter {
                 meta1Entr.numAllChildren = this.meta2Entries.length - prevNumChld;
             } else {
                 const subFile = new DsonWriter(json, this.revision);
-                this.align(writer);
+                this.align();
                 const embededData = subFile.bytes();
-                writer.writeInt32(embededData.byteLength);
-                writer.writeSignedBytes(new Int8Array(embededData));
-                this.buffArr.push(this.trimWriter(writer));
+                this.data.writeInt32(embededData.byteLength);
+                this.data.writeSignedBytes(new Int8Array(embededData));
             }
         } else {
             // write data based on type
             this.nameStack.push(name);
 
             if (DsonTypes.isA(FieldType.TYPE_FLOATARRAY, getNameIttr(this.nameStack))) {
-                this.align(writer);
+                this.align();
                 for (let i = 0; i < json.length; i++) {
-                    writer.writeUnsignedBytes(new Uint8Array(this.floatBytes(json[i])));
+                    this.data.writeUnsignedBytes(new Uint8Array(this.floatBytes(json[i])));
                 }
             } else if (DsonTypes.isA(FieldType.TYPE_INTVECTOR, getNameIttr(this.nameStack))) {
-                this.align(writer);
+                this.align();
 
                 const vecData = new Writer(new Uint8Array(1000));
 
@@ -156,10 +149,10 @@ export class DsonWriter {
                     }
                 }
                 
-                writer.writeInt32(json.length);
-                writer.writeUnsignedBytes(new Uint8Array(this.trimWriter(vecData)));
+                this.data.writeInt32(json.length);
+                this.data.writeUnsignedBytes(new Uint8Array(this.trimWriter(vecData)));
             } else if (DsonTypes.isA(FieldType.TYPE_STRINGVECTOR, getNameIttr(this.nameStack))) {
-                this.align(writer);
+                this.align();
 
                 const vecData = new Writer(new Uint8Array(1000));
 
@@ -169,45 +162,43 @@ export class DsonWriter {
                     vecData.writeUnsignedBytes(new Uint8Array(this.stringBytes(str)));
                 }
                 
-                writer.writeInt32(json.length);
-                writer.writeUnsignedBytes(new Uint8Array(this.trimWriter(vecData)));
+                this.data.writeInt32(json.length);
+                this.data.writeUnsignedBytes(new Uint8Array(this.trimWriter(vecData)));
             } else if (DsonTypes.isA(FieldType.TYPE_FLOAT, getNameIttr(this.nameStack))) {
-                this.align(writer);
-                writer.writeSignedBytes(new Int8Array(this.floatBytes(json as number)));
+                // ! validated
+                this.align();
+                this.data.writeSignedBytes(new Int8Array(this.floatBytes(json as number)));
             } else if (DsonTypes.isA(FieldType.TYPE_TWOINT, getNameIttr(this.nameStack))) {
-                this.align(writer);
+                this.align();
                 if (typeof json[0] == "number" && typeof json[1] == "number") {
-                    writer.writeInt32(json[0]);
-                    writer.writeInt32(json[1]);
+                    this.data.writeInt32(json[0]);
+                    this.data.writeInt32(json[1]);
                 } else {
                     throw new Error(`Expected ${name} field value to be a TWO_BOOL array`)
                 }
             } else if (DsonTypes.isA(FieldType.TYPE_CHAR, getNameIttr(this.nameStack))) {
-                writer.writeByte((json as string).charCodeAt(0));
+                this.data.writeByte((json as string).charCodeAt(0));
             } else if (typeof json == "number") {
-                console.log("is a number")
-                this.align(writer);
-                // writer.writeSignedBytes(new Int8Array(this.intBytes(json as number)));
-                writer.writeInt32(json as number);
+                this.align();
+                this.data.writeInt32(json as number);
             } else if (typeof json == "string") {
-                this.align(writer);
-                writer.writeSignedBytes(new Int8Array(this.stringBytes(json as string)));
+                this.align();
+                this.data.writeSignedBytes(new Int8Array(this.stringBytes(json as string)));
             } else if (Array.isArray(json)) {
-                this.align(writer);
+                this.align();
                 if ((json[0] == true || json[0] == false) && (json[1] == true || json[1] == false)) {
-                    writer.writeByte(json[0] as boolean ? 0x01 : 0x00);
-                    writer.writeByte(json[1] as boolean ? 0x01 : 0x00);
+                    this.data.writeByte(json[0] as boolean ? 0x01 : 0x00);
+                    this.data.writeByte(json[1] as boolean ? 0x01 : 0x00);
                 } else {
                     throw new Error(`Expected ${name} field value to be a TWO_BOOL array`)
                 }
             } else if (typeof json == "boolean") {
-                writer.writeByte(json as boolean ? 0x01 : 0x00);
+                this.data.writeByte(json as boolean ? 0x01 : 0x00);
             } else {
                 throw new Error("Cant figure out the type of " + name);
             }
 
             this.nameStack.pop();
-            this.buffArr.push(this.trimWriter(writer));
         }
     }
 
@@ -237,10 +228,8 @@ export class DsonWriter {
         return writer.data;
     }
     
-    // ? validated
     bytes(): ArrayBuffer {
-        const writer = new Writer(new Int8Array(0x40 + this.meta1Entries.length * 0x10 + this.meta2Entries.length * 0x0C + this.data.byteLength));
-        console.log(writer.length);
+        const writer = new Writer(new Int8Array(0x40 + this.meta1Entries.length * 0x10 + this.meta2Entries.length * 0x0C + this.data.length));
 
         writer.writeUint32(MAGIC_NUMBER);
         writer.writeUint16(0);
@@ -281,7 +270,7 @@ export class DsonWriter {
             writer.writeUint32(entr.fieldInfo);
         }
 
-        writer.writeUnsignedBytes(this.data);
+        writer.writeUnsignedBytes(new Uint8Array(this.data.data));
 
         return writer.data;
     }
@@ -290,17 +279,7 @@ export class DsonWriter {
         return writer.data.slice(0, writer.offset+1);
     }
 
-    private getCurrentDataSize(curBuff?:ArrayBuffer) {
-        let size = 0;
-        this.buffArr.forEach((buf) => {
-            size += buf.byteLength;
-        });
-        if (curBuff) size += curBuff.byteLength;
-        return size;
-    }
-
-    private align(writer:Writer): void {
-        console.log((4 - ((this.getCurrentDataSize() + writer.offset - 1) % 4)) % 4);
-        writer.writeUnsignedBytes(new Uint8Array((4 - ((this.getCurrentDataSize() + writer.offset - 1) % 4)) % 4));
+    private align(): void {
+        this.data.writeUnsignedBytes(new Uint8Array((4 - ((this.data.offset) % 4)) % 4));
     }
 }

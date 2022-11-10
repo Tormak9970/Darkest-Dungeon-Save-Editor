@@ -49,6 +49,17 @@ export class Writer {
         this.length = (new Uint8Array(this.data)).length;
     }
 
+    /**
+     * Removes all trailing 0x00 bytes from the writer
+     */
+    trim() {
+        const newDat = this.data.slice(0, this.offset+1);
+
+        this.data = newDat;
+        this.view = new DataView(this.data);
+        this.length = (new Uint8Array(this.data)).length;
+    }
+
     #writeI(method: keyof DataView, length:number): (data:any, endianness?: boolean) => number {
         if (this.remaining() <= length) {
             this.expandCapacity();
@@ -83,7 +94,7 @@ export class Writer {
      * @returns the number of bytes left in the Writer
      */
     remaining(): number {
-        return this.length - this.offset;
+        return this.length - this.offset+1;
     }
 
     /**
