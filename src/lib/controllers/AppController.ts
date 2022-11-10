@@ -24,6 +24,7 @@ import { DsonWriter } from "../models/DsonWriter";
 import { UnhashBehavior } from "../models/UnhashBehavior";
 import { Reader } from "../utils/Reader";
 import { Utils } from "../utils/Utils";
+import { BackupsController } from "./BackupsController";
 import { GenerateNamesController } from "./GenerateNamesController";
 import { ToasterController } from "./ToasterController";
 
@@ -32,6 +33,7 @@ import { ToasterController } from "./ToasterController";
  */
 export class AppController {
     static namesController = new GenerateNamesController();
+    static backupsController = new BackupsController();
 
     /**
      * Sets up the app
@@ -86,14 +88,16 @@ export class AppController {
      * Backs up the user's saves
      */
     static async backup() {
+        await AppController.backupsController.backup();
         
+        ToasterController.showSuccessToast("Backup made!");
     }
 
     /**
      * Load up the existing backups
      */
     static async loadBackups() {
-        
+        await AppController.backupsController.loadBackups();
     }
 
     /**
@@ -134,6 +138,8 @@ export class AppController {
 
         discardChangesDisabled.set(true);
         saveChangesDisabled.set(true);
+
+        ToasterController.showSuccessToast("Changes discarded!");
     }
 
     /**
