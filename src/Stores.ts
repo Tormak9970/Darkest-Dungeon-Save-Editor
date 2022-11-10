@@ -27,9 +27,13 @@ export const modDataDirPath = writable("");
 
 export const unchangedTabs:Writable<{[key:string]:object}> = writable({});
 export const dsonFiles:Writable<{[key:string]:DsonFile}> = writable({});
-export const tabs:Writable<{}> = writable({});
+export const tabs:Writable<{[key:string]:object}> = writable({});
 export const selectedTab = writable("");
 
 export const loaderProgress = writable("0%");
 
+export const showLoadBackupModal = writable(false);
 export const showConfirmDiscard = writable(false);
+
+export const discardChangesDisabled = writable(true);
+export const saveChangesDisabled = writable(true);

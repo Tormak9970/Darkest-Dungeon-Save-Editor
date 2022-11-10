@@ -19,10 +19,11 @@
     export let text: string;
     export let width = "40px";
     export let onClick: (e: MouseEvent) => void;
+    export let disabled = false;
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
-<button class="button" style="width: {width};" on:click={onClick}>
+<button class="button" class:disabled={disabled} style="width: {width};" on:click={onClick}>
     <div>{text}</div>
 </button>
 
@@ -53,5 +54,10 @@
 
     .button:focus {
         border: 1px solid var(--highlight);
+    }
+
+    .disabled {
+        pointer-events: none;
+        opacity: 0.7;
     }
 </style>

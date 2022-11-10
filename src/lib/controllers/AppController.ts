@@ -17,7 +17,7 @@
  */
 import { fs, path } from "@tauri-apps/api";
 import { get,  } from "svelte/store";
-import { appDataDir, dsonFiles, fileNamesPath, saveDirPath, tabs, unchangedTabs } from "../../Stores";
+import { appDataDir, discardChangesDisabled, dsonFiles, fileNamesPath, saveChangesDisabled, saveDirPath, selectedTab, tabs, unchangedTabs } from "../../Stores";
 import { DsonFile } from "../models/DsonFile";
 import { DsonTypes } from "../models/DsonTypes";
 import { DsonWriter } from "../models/DsonWriter";
@@ -77,6 +77,9 @@ export class AppController {
         unchangedTabs.set(JSON.parse(JSON.stringify(newTabs)));
         tabs.set(newTabs);
         dsonFiles.set(newDsonFiles);
+
+        discardChangesDisabled.set(true);
+        saveChangesDisabled.set(true);
     }
 
     /**
@@ -113,13 +116,24 @@ export class AppController {
         const dFile = new DsonFile(new Reader(dataBuf), UnhashBehavior.POUNDUNHASH);
         console.log(dFile);
         console.log(dFile.asJson());
+
+        // discardChangesDisabled.set(true);
+        // saveChangesDisabled.set(true);
     }
 
     /**
      * Discards the current changes
      */
     static async discardChanges() {
-        
+        const originalJsons = get(unchangedTabs);
+        tabs.set(JSON.parse(JSON.stringify(originalJsons)));
+
+        const selTab = get(selectedTab);
+        selectedTab.set("");
+        selectedTab.set(selTab);
+
+        discardChangesDisabled.set(true);
+        saveChangesDisabled.set(true);
     }
 
     /**

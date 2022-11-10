@@ -24,10 +24,11 @@
 	import Titlebar from "./components/Titlebar.svelte";
     import { AppController } from "./lib/controllers/AppController";
     
-    import { gameDataDirPath, loaderProgress, modDataDirPath, saveDirPath, showConfirmDiscard } from "./Stores";
+    import { discardChangesDisabled, gameDataDirPath, loaderProgress, modDataDirPath, saveChangesDisabled, saveDirPath, showConfirmDiscard } from "./Stores";
     import ProgressBar from "./components/info/ProgressBar.svelte";
     import { ToasterController } from "./lib/controllers/ToasterController";
     import ConfirmModal from "./components/modals/ConfirmModal.svelte";
+    import LoadBackupModal from "./components/modals/LoadBackupModal.svelte";
 
     async function loadSave(e:Event) {
         if ($gameDataDirPath == "") {
@@ -75,6 +76,7 @@
 <main>
 	<Titlebar />
     <ConfirmModal show={$showConfirmDiscard} message={"Are you sure you wan't to discard your changes?"} onConfirm={discardChanges} onCancel={async () => { $showConfirmDiscard = false; }} />
+    <LoadBackupModal />
 	<div class="content">
         <Pane title="Paths">
             <div class="row" style="margin-top: 0px;">
@@ -100,9 +102,9 @@
             <div class="bottom-panel">
                 <ProgressBar width={"300px"} progress={$loaderProgress} />
                 <div style="width: 7px; height: 1px;" />
-                <Button text={"Discard Changes"} onClick={confirmDiscard} width={"120px"} />
+                <Button text={"Discard Changes"} onClick={confirmDiscard} width={"120px"} disabled={$discardChangesDisabled} />
                 <div style="width: 7px; height: 1px;" />
-                <Button text={"Save Changes"} onClick={saveChanges} width={"100px"} />
+                <Button text={"Save Changes"} onClick={saveChanges} width={"100px"} disabled={$saveChangesDisabled} />
             </div>
         </Pane>
 	</div>

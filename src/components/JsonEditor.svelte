@@ -26,7 +26,7 @@
     import { lintKeymap, linter, lintGutter } from '@codemirror/lint';
     import { onMount } from "svelte";
     import { vsCodeHighlightStyle, vsCodeTheme } from "../lib/utils/EditorTheme";
-    import { selectedTab, tabs } from "../Stores";
+    import { discardChangesDisabled, saveChangesDisabled, selectedTab, tabs } from "../Stores";
 
     let editorContainer:HTMLDivElement;
     let isRendering = false;
@@ -66,7 +66,11 @@
                 EditorState.tabSize.of(4),
                 EditorView.updateListener.of((v) => {
                     if (v.docChanged && !isRendering) {
-                        $tabs[$selectedTab] = JSON.parse(v.state.doc.sliceString(0, v.state.doc.length))
+                        $tabs[$selectedTab] = JSON.parse(v.state.doc.sliceString(0, v.state.doc.length));
+                        if ($discardChangesDisabled || $saveChangesDisabled) {
+                            $discardChangesDisabled = false;
+                            $saveChangesDisabled = false;
+                        }
                     }
                 })
             ]
@@ -87,7 +91,7 @@
             let updateTransaction = view.state.update({
                 changes: {
                     from: 0,
-                    insert: str !+ "" ? JSON.stringify($tabs[str], null, 2) : JSON.stringify({ "message": "Select paths or choose a save file" }, null, 2)
+                    insert: (str != "") ? JSON.stringify($tabs[str], null, 2) : JSON.stringify({ "message": "Select paths or choose a save file" }, null, 2)
                 }
             });
 
