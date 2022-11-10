@@ -20,19 +20,21 @@
     import Pane from "../layout/Pane.svelte";
 
     export let message:string;
+    export let show:boolean = false;
     export let onConfirm:()=>Promise<void>;
     export let onCancel:()=>Promise<void> = async () => {};
 </script>
 
-<div class="background">
+<!-- svelte-ignore a11y-click-events-have-key-events -->
+<div class="background" class:show={show} on:click={onCancel}>
     <div class="confirm-modal">
         <Pane>
             <div class="message">
                 {message}
             </div>
             <div class="buttons">
-                <Button text={"Cancel"} onClick={onCancel} />
-                <Button text={"Confirm"} onClick={onConfirm} />
+                <Button text={"Cancel"} onClick={onCancel} width={"60px"} />
+                <Button text={"Confirm"} onClick={onConfirm} width={"60px"} />
             </div>
         </Pane>
     </div>
@@ -42,10 +44,27 @@
     @import "/theme.css";
 
     .background {
+        z-index: 2;
+        top: 30px;
+        position: absolute;
+        background-color: rgba(0, 0, 0, 0.6);
+        width: 100%;
+        height: 100%;
+        display: none;
+    }
 
+    .show {
+        display: flex;
     }
 
     .confirm-modal {
+        margin: auto;
+    }
 
+    .buttons {
+        margin-top: 14px;
+        width: 100%;
+        display: flex;
+        justify-content: space-around;
     }
 </style>

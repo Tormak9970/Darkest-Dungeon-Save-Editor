@@ -31,3 +31,5 @@ export const tabs:Writable<{}> = writable({});
 export const selectedTab = writable("");
 
 export const loaderProgress = writable("0%");
+
+export const showConfirmDiscard = writable(false);

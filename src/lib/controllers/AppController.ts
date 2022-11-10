@@ -57,7 +57,7 @@ export class AppController {
 
             for (let i = 0; i < saveConts.length; i++) {
                 const saveFilePath = saveConts[i];
-                // const saveFile = await path.join(saveDir, saveFilePath); //! may need this if .path doesnt work
+                
                 if (Utils.isSaveFile(saveFilePath.name)) {
                     const data = await fs.readBinaryFile(saveFilePath.path);
                     const reader = new Reader(data);
@@ -74,7 +74,7 @@ export class AppController {
             }, 500);
         }
 
-        unchangedTabs.set(newTabs);
+        unchangedTabs.set(JSON.parse(JSON.stringify(newTabs)));
         tabs.set(newTabs);
         dsonFiles.set(newDsonFiles);
     }
@@ -83,6 +83,13 @@ export class AppController {
      * Backs up the user's saves
      */
     static async backup() {
+        
+    }
+
+    /**
+     * Load up the existing backups
+     */
+    static async loadBackups() {
         
     }
 
@@ -130,9 +137,7 @@ export class AppController {
     static async generateNames(gamePath:string, modPath:string): Promise<void> {
         const fileNamesFilePath = get(fileNamesPath);
         const names = await AppController.namesController.generateNames(gamePath, modPath);
-        // TODO need to show progress bar as this happens
 
-        // TODO write to file in appDir
         await fs.writeTextFile(fileNamesFilePath, Array.from(names).join('\n'));
 
         DsonTypes.offerNames(Array.from(names));

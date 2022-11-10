@@ -24,9 +24,10 @@
 	import Titlebar from "./components/Titlebar.svelte";
     import { AppController } from "./lib/controllers/AppController";
     
-    import { gameDataDirPath, loaderProgress, modDataDirPath, saveDirPath } from "./Stores";
+    import { gameDataDirPath, loaderProgress, modDataDirPath, saveDirPath, showConfirmDiscard } from "./Stores";
     import ProgressBar from "./components/info/ProgressBar.svelte";
     import { ToasterController } from "./lib/controllers/ToasterController";
+    import ConfirmModal from "./components/modals/ConfirmModal.svelte";
 
     async function loadSave(e:Event) {
         if ($gameDataDirPath == "") {
@@ -58,29 +59,14 @@
         });
     }
 
-    async function confirmDiscard(e:Event) {
+    async function confirmDiscard(e:Event) { $showConfirmDiscard = true; }
+    async function discardChanges() { await AppController.discardChanges(); }
+    async function saveChanges(e:Event) { await AppController.saveChanges(); }
 
-    }
+    async function makeBackup(e:Event) { await AppController.backup(); }
+    async function loadBackup(e:Event) { await AppController.loadBackups(); }
 
-    async function discardChanges() {
-
-    }
-
-    async function saveChanges(e:Event) {
-        await AppController.saveChanges();
-    }
-
-    function makeBackup(e:Event) {
-
-    }
-
-    function loadBackup(e:Event) {
-
-    }
-
-    async function findNames(e:Event) {
-        await AppController.generateNames($gameDataDirPath, $modDataDirPath);
-    }
+    async function findNames(e:Event) { await AppController.generateNames($gameDataDirPath, $modDataDirPath); }
 </script>
 
 <div class="wrap">
@@ -88,6 +74,7 @@
 </div>
 <main>
 	<Titlebar />
+    <ConfirmModal show={$showConfirmDiscard} message={"Are you sure you wan't to discard your changes?"} onConfirm={discardChanges} onCancel={async () => { $showConfirmDiscard = false; }} />
 	<div class="content">
         <Pane title="Paths">
             <div class="row" style="margin-top: 0px;">
@@ -163,6 +150,7 @@
     }
 
     .content {
+        z-index: 1;
         margin-top: 5px;
         width: 100%;
         height: calc(100% - 35px);
