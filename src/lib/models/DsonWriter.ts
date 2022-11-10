@@ -15,15 +15,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>
  */
-
-import GrowableInt8Array from "../externals/GrowableInt8Array.";
-
 import { getNameIttr, Stack } from "../utils/Utils";
 import { Writer } from "../utils/Writer";
-import { DsonHeader, DsonMeta1Block, DsonMeta1BlockEntry, DsonMeta2BlockEntry, MAGIC_NUMBER } from "./DsonFile";
+import { DsonHeader, DsonMeta1BlockEntry, DsonMeta2BlockEntry, MAGIC_NUMBER } from "./DsonFile";
 import { DsonTypes, FieldType } from "./DsonTypes";
 
-function concatBuffs(buffArr:ArrayBuffer[]): ArrayBuffer {
+function concatBuffs(buffArr:ArrayBuffer[]): Uint8Array {
     let res = new Uint8Array(buffArr[0]);
 
     for (let i = 1; i < buffArr.length; i++) {
@@ -36,7 +33,7 @@ function concatBuffs(buffArr:ArrayBuffer[]): ArrayBuffer {
         res = tmp;
     }
 
-    return res.buffer;
+    return res;
 }
 
 const encoder = new TextEncoder();
@@ -44,13 +41,14 @@ const encoder = new TextEncoder();
 export class DsonWriter {
     header:DsonHeader;
     private buffArr:ArrayBuffer[]
-    data:ArrayBuffer;
+    data:Uint8Array;
     meta1Entries:DsonMeta1BlockEntry[];
     parentIdxStack:Stack<number>;
     nameStack:Stack<string>;
     meta2Entries:DsonMeta2BlockEntry[];
     revision:number;
 
+    // ? validated
     constructor(json:object, revision:number) {
         this.header = new DsonHeader();
         this.buffArr = [];
@@ -81,7 +79,7 @@ export class DsonWriter {
         this.header.numMeta2Entries = this.meta2Entries.length;
         this.header.meta2Offset = 0x40 + this.meta1Entries.length * 0x10;
         this.header.dataOffset = 0x40 + this.meta1Entries.length * 0x10 + this.meta2Entries.length * 0x0C;
-        this.header.dataLength = this.data.byteLength;
+        this.header.dataLength = this.data.length;
         this.parentIdxStack.pop();
     }
 
@@ -187,8 +185,10 @@ export class DsonWriter {
             } else if (DsonTypes.isA(FieldType.TYPE_CHAR, getNameIttr(this.nameStack))) {
                 writer.writeByte((json as string).charCodeAt(0));
             } else if (typeof json == "number") {
+                console.log("is a number")
                 this.align(writer);
-                writer.writeSignedBytes(new Int8Array(this.intBytes(json as number)));
+                // writer.writeSignedBytes(new Int8Array(this.intBytes(json as number)));
+                writer.writeInt32(json as number);
             } else if (typeof json == "string") {
                 this.align(writer);
                 writer.writeSignedBytes(new Int8Array(this.stringBytes(json as string)));
@@ -237,8 +237,10 @@ export class DsonWriter {
         return writer.data;
     }
     
+    // ? validated
     bytes(): ArrayBuffer {
         const writer = new Writer(new Int8Array(0x40 + this.meta1Entries.length * 0x10 + this.meta2Entries.length * 0x0C + this.data.byteLength));
+        console.log(writer.length);
 
         writer.writeUint32(MAGIC_NUMBER);
         writer.writeUint16(0);
@@ -279,7 +281,7 @@ export class DsonWriter {
             writer.writeUint32(entr.fieldInfo);
         }
 
-        writer.writeUnsignedBytes(new Uint8Array(this.data));
+        writer.writeUnsignedBytes(this.data);
 
         return writer.data;
     }
@@ -298,6 +300,7 @@ export class DsonWriter {
     }
 
     private align(writer:Writer): void {
-        writer.writeUnsignedBytes(new Uint8Array((4 - (this.data.byteLength % 4)) % 4));
+        console.log((4 - ((this.getCurrentDataSize() + writer.offset - 1) % 4)) % 4);
+        writer.writeUnsignedBytes(new Uint8Array((4 - ((this.getCurrentDataSize() + writer.offset - 1) % 4)) % 4));
     }
 }

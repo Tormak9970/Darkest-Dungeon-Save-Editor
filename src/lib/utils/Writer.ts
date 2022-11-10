@@ -39,7 +39,20 @@ export class Writer {
         return (data as Uint8Array).buffer !== undefined;
     }
 
+    private expandCapacity() {
+        const newDat = new ArrayBuffer(this.data.byteLength * 2);
+        const uint8Arr = new Uint8Array(newDat);
+        uint8Arr.set(new Uint8Array(this.data), 0);
+
+        this.data = newDat;
+        this.view = new DataView(this.data);
+        this.length = (new Uint8Array(this.data)).length;
+    }
+
     #writeI(method: keyof DataView, length:number): (data:any, endianness?: boolean) => number {
+        if (this.remaining() <= length) {
+            this.expandCapacity();
+        }
         return (data:any, endianness?: boolean) => {
             // @ts-ignore
             this.view[method](this.offset, data, endianness ? endianness : GLOBAL_ENDIANNESS);
@@ -95,6 +108,9 @@ export class Writer {
      * @param  {boolean} endianness whether or not to use littleEdian. Default is true.
      */
     writeSignedBytes(data:Int8Array, endianness?: boolean) {
+        if (this.remaining() <= data.length) {
+            this.expandCapacity();
+        }
         const nDat = new Int8Array(this.data);
         nDat.set((endianness ? endianness : GLOBAL_ENDIANNESS) ? data : data.reverse(), this.offset);
         this.data = nDat.buffer
@@ -109,6 +125,9 @@ export class Writer {
      * @param  {boolean} endianness whether or not to use littleEdian. Default is true.
      */
     writeUnsignedBytes(data:Uint8Array, endianness?: boolean) {
+        if (this.remaining() <= data.length) {
+            this.expandCapacity();
+        }
         const nDat = new Uint8Array(this.data);
         nDat.set((endianness ? endianness : GLOBAL_ENDIANNESS) ? data : data.reverse(), this.offset);
         this.data = nDat.buffer
@@ -188,6 +207,9 @@ export class Writer {
      * @returns the number of bytes written
      */
     writeFloat16(data:number, endianness: boolean = true) {
+        if (this.remaining() <= 2) {
+            this.expandCapacity();
+        }
         const res = new Float16Array([data]);
 
         const nDat = new Float16Array(this.data);
@@ -223,6 +245,9 @@ export class Writer {
      */
     writeLenPrefixString(str:string, endianness: boolean = true): number {
         const length = str.length;
+        if (this.remaining() <= length) {
+            this.expandCapacity();
+        }
         this.writeUint32(length, endianness);
         
         const strBytes = encoder.encode(str);
@@ -239,6 +264,9 @@ export class Writer {
      */
     write00PaddedString(str:string, endianness: boolean = true): number {
         const strBytes = encoder.encode(str);
+        if (this.remaining() <= strBytes.length) {
+            this.expandCapacity();
+        }
         this.writeUnsignedBytes(strBytes, endianness);
 
         this.writeUint8(0x00, endianness);

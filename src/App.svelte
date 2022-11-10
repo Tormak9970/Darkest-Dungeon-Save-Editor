@@ -67,7 +67,7 @@
     }
 
     async function saveChanges(e:Event) {
-
+        await AppController.saveChanges();
     }
 
     function makeBackup(e:Event) {

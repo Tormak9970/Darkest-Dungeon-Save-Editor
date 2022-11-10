@@ -17,9 +17,10 @@
  */
 import { fs, path } from "@tauri-apps/api";
 import { get,  } from "svelte/store";
-import { appDataDir, dsonFiles, fileNamesPath, saveDirPath, tabs } from "../../Stores";
+import { appDataDir, dsonFiles, fileNamesPath, saveDirPath, tabs, unchangedTabs } from "../../Stores";
 import { DsonFile } from "../models/DsonFile";
 import { DsonTypes } from "../models/DsonTypes";
+import { DsonWriter } from "../models/DsonWriter";
 import { UnhashBehavior } from "../models/UnhashBehavior";
 import { Reader } from "../utils/Reader";
 import { Utils } from "../utils/Utils";
@@ -73,6 +74,7 @@ export class AppController {
             }, 500);
         }
 
+        unchangedTabs.set(newTabs);
         tabs.set(newTabs);
         dsonFiles.set(newDsonFiles);
     }
@@ -88,7 +90,22 @@ export class AppController {
      * Saves the current changes
      */
     static async saveChanges() {
+        const revision = Object.values(get(dsonFiles))[0].header.revision;
+        const changes = Object.entries(get(tabs));
 
+        // for (let i = 0; i < changes.length; i++) {
+
+        // }
+
+        const fileName = changes[0][0];
+        const newData = changes[0][1];
+        console.log(newData)
+        const dWriter = new DsonWriter(newData as any, revision);
+        const dataBuf = dWriter.bytes();
+
+        const dFile = new DsonFile(new Reader(dataBuf), UnhashBehavior.POUNDUNHASH);
+        console.log(dFile);
+        console.log(dFile.asJson());
     }
 
     /**

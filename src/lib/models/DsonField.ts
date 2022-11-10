@@ -45,7 +45,6 @@ export class DsonField {
         this.children = [];
     }
 
-    //? all of the else if conditions work
     guessType(behavior:UnhashBehavior): boolean {
         if (this.parseHardcodedType(behavior)) {
             return true;
@@ -123,7 +122,6 @@ export class DsonField {
         return false;
     }
 
-    // ? validated this works correctly
     private parseFloat(): boolean {
         if (DsonTypes.isA(FieldType.TYPE_FLOAT, this.nameIterator())) {
             if (this.alignedSize() == 4) {
@@ -138,7 +136,6 @@ export class DsonField {
         return false;
     }
 
-    // ? validated this works correctly
     private parseStringVector(): boolean {
         if (DsonTypes.isA(FieldType.TYPE_STRINGVECTOR, this.nameIterator())) {
             this.type = FieldType.TYPE_STRINGVECTOR;
@@ -174,7 +171,6 @@ export class DsonField {
         return false;
     }
 
-    // ? validated this works correctly
     private parseIntVector(behavior:UnhashBehavior): boolean {
         if (DsonTypes.isA(FieldType.TYPE_INTVECTOR, this.nameIterator())) {
             const tempArr = this.rawData.slice(this.alignmentSkip(), this.alignmentSkip() + 4);
@@ -257,7 +253,6 @@ export class DsonField {
         return false;
     }
 
-    // ? validated
     private parseString(): boolean {
         if (this.alignedSize() >= 5) {
             const tmpArr = this.rawData.slice(this.alignmentSkip(), this.alignmentSkip() + 4)
