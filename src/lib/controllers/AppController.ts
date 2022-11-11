@@ -17,7 +17,7 @@
  */
 import { fs, path } from "@tauri-apps/api";
 import { get,  } from "svelte/store";
-import { appDataDir, discardChangesDisabled, dsonFiles, fileNamesPath, saveChangesDisabled, saveDirPath, selectedTab, tabs, unchangedTabs } from "../../Stores";
+import { appDataDir, changedTabs, discardChangesDisabled, dsonFiles, fileNamesPath, saveChangesDisabled, saveDirPath, selectedTab, tabs, unchangedTabs } from "../../Stores";
 import { DsonFile } from "../models/DsonFile";
 import { DsonTypes } from "../models/DsonTypes";
 import { DsonWriter } from "../models/DsonWriter";
@@ -54,6 +54,7 @@ export class AppController {
 
         const newTabs = {};
         const newDsonFiles = {};
+        const wasChanged = {};
         if (saveDir != "") {
             const loaderId = ToasterController.showLoaderToast("Loading save data");
             const saveConts = await fs.readDir(saveDir);
@@ -68,6 +69,7 @@ export class AppController {
 
                     newTabs[saveFilePath.name] = dson.asJson();
                     newDsonFiles[saveFilePath.name] = dson;
+                    wasChanged[saveFilePath.name] = false;
                 }
             }
             ToasterController.remLoaderToast(loaderId);
@@ -78,6 +80,7 @@ export class AppController {
         }
 
         unchangedTabs.set(JSON.parse(JSON.stringify(newTabs)));
+        changedTabs.set(wasChanged);
         tabs.set(newTabs);
         dsonFiles.set(newDsonFiles);
 
@@ -101,23 +104,25 @@ export class AppController {
     static async saveChanges() {
         const revision = Object.values(get(dsonFiles))[0].header.revision;
         const changes = Object.entries(get(tabs));
+        const cTabs = get(changedTabs);
 
+        // TODO only write files with changes
         for (let i = 0; i < changes.length; i++) {
             const fileName = changes[i][0];
-            const filePath = await path.join(get(saveDirPath), fileName);
-            const newData = changes[i][1];
-            console.log(newData)
-            const dWriter = new DsonWriter(newData as any, revision);
-            const dataBuf = dWriter.bytes();
+            
+            if (cTabs[fileName]) {
+                const filePath = await path.join(get(saveDirPath), fileName);
+                const newData = changes[i][1];
+                
+                const dWriter = new DsonWriter(newData as any, revision);
+                const dataBuf = dWriter.bytes();
 
-            // await fs.writeBinaryFile(filePath, dataBuf);
-
-            const dFile = new DsonFile(new Reader(dataBuf), UnhashBehavior.POUNDUNHASH);
-            console.log(dFile.asJson());
+                await fs.writeBinaryFile(filePath, dataBuf);
+            }
         }
 
-        // discardChangesDisabled.set(true);
-        // saveChangesDisabled.set(true);
+        discardChangesDisabled.set(true);
+        saveChangesDisabled.set(true);
     }
 
     /**

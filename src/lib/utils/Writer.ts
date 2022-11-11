@@ -40,7 +40,7 @@ export class Writer {
     }
 
     private expandCapacity() {
-        const newDat = new ArrayBuffer(this.data.byteLength * 2);
+        const newDat = new ArrayBuffer(this.length * 2);
         const uint8Arr = new Uint8Array(newDat);
         uint8Arr.set(new Uint8Array(this.data), 0);
 
@@ -53,7 +53,7 @@ export class Writer {
      * Removes all trailing 0x00 bytes from the writer
      */
     trim() {
-        const newDat = this.data.slice(0, this.offset+1);
+        const newDat = this.data.slice(0, this.offset);
 
         this.data = newDat;
         this.view = new DataView(this.data);
@@ -94,7 +94,7 @@ export class Writer {
      * @returns the number of bytes left in the Writer
      */
     remaining(): number {
-        return this.length - this.offset+1;
+        return this.length - (this.offset+1);
     }
 
     /**

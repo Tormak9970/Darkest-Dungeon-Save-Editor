@@ -26,6 +26,7 @@ export const gameDataDirPath = writable("");
 export const modDataDirPath = writable("");
 
 export const unchangedTabs:Writable<{[key:string]:object}> = writable({});
+export const changedTabs:Writable<{[key:string]:boolean}> = writable({});
 export const dsonFiles:Writable<{[key:string]:DsonFile}> = writable({});
 export const tabs:Writable<{[key:string]:object}> = writable({});
 export const selectedTab = writable("");

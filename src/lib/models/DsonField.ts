@@ -114,7 +114,6 @@ export class DsonField {
                 const tmpArr = this.rawData.slice(this.alignmentSkip(), this.alignmentSkip() + 8);
                 const buf = new Reader(tmpArr);
                 this.dataValue = [buf.readInt32(), buf.readInt32()];
-                console.log("TWO_INT: " + this.dataValue);
                 this.dataString = "[" + this.dataValue[0] + ", " + this.dataValue[1] + "]";
                 return true;
             }

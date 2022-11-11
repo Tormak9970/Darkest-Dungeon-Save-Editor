@@ -30,7 +30,6 @@ export class DsonToJsonController {
         const meta1Block = testDson.meta1Block;
         const meta2Block = testDson.meta2Block;
         const data = testDson.data;
-        console.log(data);
         fs.writeFileSync(output, JSON.stringify(testDson));
     }
 }

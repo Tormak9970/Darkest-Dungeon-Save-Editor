@@ -40,7 +40,6 @@ const encoder = new TextEncoder();
 
 export class DsonWriter {
     header:DsonHeader;
-    private buffArr:ArrayBuffer[]
     data:Writer;
     meta1Entries:DsonMeta1BlockEntry[];
     parentIdxStack:Stack<number>;
@@ -150,7 +149,8 @@ export class DsonWriter {
                 }
                 
                 this.data.writeInt32(json.length);
-                this.data.writeUnsignedBytes(new Uint8Array(this.trimWriter(vecData)));
+                vecData.trim();
+                this.data.writeUnsignedBytes(new Uint8Array(vecData.data));
             } else if (DsonTypes.isA(FieldType.TYPE_STRINGVECTOR, getNameIttr(this.nameStack))) {
                 this.align();
 
@@ -163,7 +163,8 @@ export class DsonWriter {
                 }
                 
                 this.data.writeInt32(json.length);
-                this.data.writeUnsignedBytes(new Uint8Array(this.trimWriter(vecData)));
+                vecData.trim();
+                this.data.writeUnsignedBytes(new Uint8Array(vecData.data));
             } else if (DsonTypes.isA(FieldType.TYPE_FLOAT, getNameIttr(this.nameStack))) {
                 // ! validated
                 this.align();
@@ -179,11 +180,13 @@ export class DsonWriter {
             } else if (DsonTypes.isA(FieldType.TYPE_CHAR, getNameIttr(this.nameStack))) {
                 this.data.writeByte((json as string).charCodeAt(0));
             } else if (typeof json == "number") {
+                // ! validated
                 this.align();
                 this.data.writeInt32(json as number);
             } else if (typeof json == "string") {
+                // ! validated
                 this.align();
-                this.data.writeSignedBytes(new Int8Array(this.stringBytes(json as string)));
+                this.data.writeUnsignedBytes(new Uint8Array(this.stringBytes(json as string)));
             } else if (Array.isArray(json)) {
                 this.align();
                 if ((json[0] == true || json[0] == false) && (json[1] == true || json[1] == false)) {
@@ -193,6 +196,7 @@ export class DsonWriter {
                     throw new Error(`Expected ${name} field value to be a TWO_BOOL array`)
                 }
             } else if (typeof json == "boolean") {
+                // ! validated
                 this.data.writeByte(json as boolean ? 0x01 : 0x00);
             } else {
                 throw new Error("Cant figure out the type of " + name);
@@ -218,6 +222,8 @@ export class DsonWriter {
             writer.writeInt32(strBytes.length+1);
             writer.writeUnsignedBytes(strBytes);
             writer.writeByte(0x00);
+
+            writer.trim();
             return writer.data;
         }
     }
@@ -225,6 +231,7 @@ export class DsonWriter {
     private intBytes(int:number): ArrayBuffer {
         const writer = new Writer(new Int8Array(4));
         writer.writeInt32(int);
+        writer.trim();
         return writer.data;
     }
     
@@ -272,11 +279,8 @@ export class DsonWriter {
 
         writer.writeUnsignedBytes(new Uint8Array(this.data.data));
 
+        writer.trim();
         return writer.data;
-    }
-
-    private trimWriter(writer:Writer): ArrayBuffer {
-        return writer.data.slice(0, writer.offset+1);
     }
 
     private align(): void {

@@ -26,7 +26,7 @@
     import { lintKeymap, linter, lintGutter } from '@codemirror/lint';
     import { onMount } from "svelte";
     import { vsCodeHighlightStyle, vsCodeTheme } from "../lib/utils/EditorTheme";
-    import { discardChangesDisabled, saveChangesDisabled, selectedTab, tabs } from "../Stores";
+    import { changedTabs, discardChangesDisabled, saveChangesDisabled, selectedTab, tabs } from "../Stores";
 
     let editorContainer:HTMLDivElement;
     let isRendering = false;
@@ -67,6 +67,7 @@
                 EditorView.updateListener.of((v) => {
                     if (v.docChanged && !isRendering) {
                         $tabs[$selectedTab] = JSON.parse(v.state.doc.sliceString(0, v.state.doc.length));
+                        $changedTabs[$selectedTab] = true;
                         if ($discardChangesDisabled || $saveChangesDisabled) {
                             $discardChangesDisabled = false;
                             $saveChangesDisabled = false;
