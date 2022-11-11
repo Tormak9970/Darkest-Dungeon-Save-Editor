@@ -75,7 +75,7 @@
     <ConfirmModal show={$showConfirmDiscard} message={"Are you sure you wan't to discard your changes?"} onConfirm={discardChanges} onCancel={async () => { $showConfirmDiscard = false; }} />
     <LoadBackupModal />
 	<div class="content">
-        <Pane title="Paths">
+        <Pane title="Paths" width={"calc(100% - 34px)"}>
             <div class="row" style="margin-top: 0px;">
                 <PathField fieldName="Save Directory" title={"Select a save directory"} defaultPath={$saveDirPath} cVal={$saveDirPath} handler={loadSave} />
                 <div style="height: 1px; width: 7px;" />
@@ -92,10 +92,10 @@
                 <Button text={"Find Names"} onClick={findNames} width={"100px"} />
             </div>
         </Pane>
-        <Pane title="Save Data" fillParent>
+        <Pane title="Save Data" fillParent width={"calc(100% - 34px)"}>
             <Tabs />
         </Pane>
-        <Pane padding={"7px"}>
+        <Pane padding={"7px"} width={"calc(100% - 34px)"}>
             <div class="bottom-wrapper">
                 <div class="rights">© Travis Lane 2022</div>
                 <div class="bottom-panel">

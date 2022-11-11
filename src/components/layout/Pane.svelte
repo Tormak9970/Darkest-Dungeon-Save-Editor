@@ -20,10 +20,11 @@
     export let width:string = "100%";
     export let height:string = "auto";
     export let padding:string = "14px 9px";
+    export let margin:string = "7px";
     export let fillParent:boolean = false;
 </script>
 
-<div class="pane" style="width: calc({width} - 34px); height: {height}; padding: {padding};{fillParent ? " flex: 1;" : ""}">
+<div class="pane" style="width: {width}; height: {height}; margin: {margin}; padding: {padding};{fillParent ? " flex: 1;" : ""}">
     <div class="title-cont">
         <div class="title">{title}</div>
         <div class="border-blocker" />
@@ -37,7 +38,6 @@
     .pane {
         border: 1px solid #000;
         box-shadow: 0 0 4px rgb(0 0 0 / 50%);
-        margin: 7px;
 
         position: relative;
 

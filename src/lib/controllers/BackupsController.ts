@@ -102,7 +102,7 @@ export class BackupsController {
      * @param fileName FileName to deconstruct
      * @returns The data decontructed form the fileName
      */
-    private deconstructSave(fileName:string): SaveData {
+    deconstructSave(fileName:string): SaveData {
         const segs = fileName.substring(0, fileName.length-3).split("__");
         const saveSlot = segs[0];
         const [day, month, year] = segs[1].split(".");

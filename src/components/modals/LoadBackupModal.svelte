@@ -88,15 +88,13 @@
     }
 
     .backups-cont {
-        min-width: 400px;
-        padding: 11px 9px;
-
         background-color: var(--background);
 
         display: flex;
         flex-direction: column;
-        align-items: center;
         justify-content: flex-start;
+
+        padding-top: 7px;
     }
 
     .buttons {

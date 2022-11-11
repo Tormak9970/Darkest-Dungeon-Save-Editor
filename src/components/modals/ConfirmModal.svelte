@@ -28,7 +28,7 @@
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <div class="background" class:show={show} on:click={onCancel}>
     <div class="confirm-modal">
-        <Pane>
+        <Pane width={"calc(100% - 34px)"}>
             <div class="message">
                 {message}
             </div>
