@@ -35,6 +35,7 @@ export const loaderProgress = writable("0%");
 
 export const showLoadBackupModal = writable(false);
 export const showConfirmDiscard = writable(false);
+export const showConfirmReload = writable(false);
 
 export const discardChangesDisabled = writable(true);
 export const saveChangesDisabled = writable(true);

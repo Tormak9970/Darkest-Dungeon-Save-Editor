@@ -24,11 +24,12 @@
 	import Titlebar from "./components/Titlebar.svelte";
     import { AppController } from "./lib/controllers/AppController";
     
-    import { discardChangesDisabled, gameDataDirPath, loaderProgress, modDataDirPath, saveChangesDisabled, saveDirPath, showConfirmDiscard } from "./Stores";
+    import { discardChangesDisabled, gameDataDirPath, loaderProgress, modDataDirPath, saveChangesDisabled, saveDirPath, showConfirmDiscard, showConfirmReload } from "./Stores";
     import ProgressBar from "./components/info/ProgressBar.svelte";
     import { ToasterController } from "./lib/controllers/ToasterController";
     import ConfirmModal from "./components/modals/ConfirmModal.svelte";
     import LoadBackupModal from "./components/modals/LoadBackupModal.svelte";
+    import ReloadButton from "./components/interactable/ReloadButton.svelte";
 
     async function loadSave(e:Event) {
         if ($gameDataDirPath == "") {
@@ -60,6 +61,10 @@
         });
     }
 
+    async function confirmReload(e:Event) { $showConfirmReload = true; }
+
+    async function reload() { await AppController.reload(); }
+
     async function confirmDiscard(e:Event) { $showConfirmDiscard = true; }
     async function discardChanges() { await AppController.discardChanges(); }
     async function saveChanges(e:Event) { await AppController.saveChanges(); }
@@ -72,7 +77,8 @@
 
 <main>
 	<Titlebar />
-    <ConfirmModal show={$showConfirmDiscard} message={"Are you sure you wan't to discard your changes?"} onConfirm={discardChanges} onCancel={async () => { $showConfirmDiscard = false; }} />
+    <ConfirmModal width={"250px"} show={$showConfirmDiscard} message={"Are you sure you want to discard your changes?"} onConfirm={discardChanges} onCancel={async () => { $showConfirmDiscard = false; }} />
+    <ConfirmModal width={"300px"} show={$showConfirmReload} message={"Are you sure you want to reload? You will loose your changes."} onConfirm={reload} onCancel={async () => { $showConfirmReload = false; }} />
     <LoadBackupModal />
 	<div class="content">
         <Pane title="Paths" width={"calc(100% - 34px)"}>
@@ -99,6 +105,8 @@
             <div class="bottom-wrapper">
                 <div class="rights">© Travis Lane 2022</div>
                 <div class="bottom-panel">
+                    <ReloadButton onClick={confirmReload} />
+                    <div style="width: 7px; height: 1px;" />
                     <ProgressBar width={"300px"} progress={$loaderProgress} />
                     <div style="width: 7px; height: 1px;" />
                     <Button text={"Discard Changes"} onClick={confirmDiscard} width={"120px"} disabled={$discardChangesDisabled} />

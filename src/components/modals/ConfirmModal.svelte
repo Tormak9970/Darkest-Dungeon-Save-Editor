@@ -21,13 +21,14 @@
 
     export let message:string;
     export let show:boolean = false;
+    export let width:string = "auto";
     export let onConfirm:()=>Promise<void>;
     export let onCancel:()=>Promise<void> = async () => {};
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <div class="background" class:show={show} on:click={onCancel}>
-    <div class="confirm-modal">
+    <div class="confirm-modal" style="width: {width};">
         <Pane width={"calc(100% - 34px)"}>
             <div class="message">
                 {message}
@@ -59,6 +60,10 @@
 
     .confirm-modal {
         margin: auto;
+    }
+
+    .message {
+        text-align: center;
     }
 
     .buttons {
