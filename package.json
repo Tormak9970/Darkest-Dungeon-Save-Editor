@@ -20,6 +20,7 @@
     "@petamoriken/float16": "^3.6.6",
     "@tauri-apps/api": "^1.1.0",
     "@zerodevx/svelte-toast": "^0.8.0",
+    "jszip": "^3.10.1",
     "lz4": "^0.6.5",
     "vitest": "^0.24.5"
   },

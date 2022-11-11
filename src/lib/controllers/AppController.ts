@@ -87,18 +87,12 @@ export class AppController {
     /**
      * Backs up the user's saves
      */
-    static async backup() {
-        await AppController.backupsController.backup();
-        
-        ToasterController.showSuccessToast("Backup made!");
-    }
+    static async backup() { await AppController.backupsController.backup(); }
 
     /**
      * Load up the existing backups
      */
-    static async loadBackups() {
-        await AppController.backupsController.loadBackups();
-    }
+    static async loadBackups() { await AppController.backupsController.loadBackups(); }
 
     /**
      * Saves the current changes
