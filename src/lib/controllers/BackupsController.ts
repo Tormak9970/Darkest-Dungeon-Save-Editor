@@ -19,7 +19,7 @@
 import { fs, path } from "@tauri-apps/api";
 import JSZip from "jszip";
 import { get } from "svelte/store";
-import { appDataDir, saveDirPath } from "../../Stores";
+import { appDataDir, saveDirPath, showLoadBackupModal } from "../../Stores";
 import { Utils } from "../utils/Utils";
 import { ToasterController } from "./ToasterController";
 
@@ -41,8 +41,24 @@ export class BackupsController {
 
     constructor() {
         appDataDir.subscribe(async (dir) => {
-            this.backupDir = await path.join(dir, "backups")
+            this.backupDir = await path.join(dir, "backups");
         });
+    }
+
+    /**
+     * Gets the save backup directory
+     * @returns The save backup directory
+     */
+    getBackupDir(): string {
+        return this.backupDir;
+    }
+
+    /**
+     * Sets the backup directory
+     * @param newDir The new backup directory
+     */
+    setBackupDir(newDir:string) {
+        this.backupDir = newDir;
     }
 
     /**
@@ -127,7 +143,7 @@ export class BackupsController {
             }
         }
 
-        const zipData = await zip.generateAsync({ type: "arraybuffer" });
+        const zipData = await zip.generateAsync({ type: "arraybuffer", compression: "DEFLATE", compressionOptions: { level: 9 } });
         await fs.writeBinaryFile(await path.join(this.backupDir, zipName), zipData);
 
         ToasterController.remLoaderToast(loaderId);
@@ -141,14 +157,41 @@ export class BackupsController {
      * Displays the backup selection modal
      */
     async showBackupsModal() {
-
+        showLoadBackupModal.set(true);
     }
 
     /**
      * Loads the provided backup and overwrites the current save
-     * @param fileName Path of the backup to load
+     * @param filePath Path of the backup to load
      */
-    async loadBackup(fileName:string) {
+    async loadBackup(filePath:string) {
+        const loaderId = ToasterController.showLoaderToast("Restoring backup...");
 
+        const saveDir = get(saveDirPath);
+        const saveParentDir = await path.dirname(saveDir);
+
+        const fileName = await path.basename(filePath);
+        const backupData = this.deconstructSave(fileName);
+        const saveSlot = backupData.saveSlot;
+
+        const zipData = await fs.readBinaryFile(filePath);
+
+        const zip = await JSZip.loadAsync(zipData);
+        const zipFiles = Object.entries(zip.files);
+
+        for (let i = 0; i < zipFiles.length; i++) {
+            const kvp = zipFiles[i];
+            const saveFileName = kvp[0];
+            const saveFileData = await kvp[1].async("arraybuffer");
+
+            const saveFilePath = await path.join(saveParentDir, saveSlot, saveFileName);
+            await fs.writeBinaryFile(saveFilePath, saveFileData);
+        }
+
+        ToasterController.remLoaderToast(loaderId);
+        
+        setTimeout(() => {
+            ToasterController.showSuccessToast("Backup restored!");
+        }, 500);
     }
 }

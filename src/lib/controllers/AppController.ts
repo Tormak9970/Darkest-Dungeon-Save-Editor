@@ -42,7 +42,8 @@ export class AppController {
         const appDir = get(appDataDir);
         const backupPath = await path.join(appDir, "backups");
         // @ts-ignore
-        if (!(await fs.exists( backupPath))) await fs.createDir(await path.join(appDir, "backups"));
+        if (!(await fs.exists(backupPath))) await fs.createDir(backupPath);
+        this.backupsController.setBackupDir(backupPath);
     }
 
     /**
