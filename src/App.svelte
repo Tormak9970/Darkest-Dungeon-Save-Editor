@@ -39,7 +39,7 @@
         } else {
             const path = (e.currentTarget as HTMLInputElement).value;
             $saveDirPath = path;
-            await AppController.loadSave();
+            await AppController.loadSaves();
         }
     }
 

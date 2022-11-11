@@ -87,7 +87,7 @@
                 } else {
                     await AppController.updateNames();
                 }
-                await AppController.loadSave();
+                await AppController.loadSaves();
             }
         }
     });

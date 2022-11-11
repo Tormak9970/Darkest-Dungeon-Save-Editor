@@ -49,7 +49,7 @@ export class AppController {
     /**
      * Loads the user's save files
      */
-    static async loadSave() {
+    static async loadSaves() {
         const saveDir = get(saveDirPath);
 
         const newTabs = {};
@@ -146,7 +146,7 @@ export class AppController {
      * Reloads the user's saves
      */
     static async reload() {
-
+        AppController.loadSaves()
     }
 
     /**
