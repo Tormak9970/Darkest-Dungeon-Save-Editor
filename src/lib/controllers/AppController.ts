@@ -145,9 +145,7 @@ export class AppController {
     /**
      * Reloads the user's saves
      */
-    static async reload() {
-        AppController.loadSaves()
-    }
+    static async reload() { await AppController.loadSaves(); }
 
     /**
      * Generates the name hashes used when loading user saves
