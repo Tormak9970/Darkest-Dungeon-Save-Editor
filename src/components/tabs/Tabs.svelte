@@ -30,7 +30,7 @@
 
     function hardSetResize() {
         let windowHeight = window.innerHeight;
-        let heightToSet = tabsElem.clientHeight;
+        let heightToSet = windowHeight - 30 - 5 - (116 + 14) - (14 + 2 + 28) - (40 + 14)
         if (oldHeight) {
             if (oldHeight > windowHeight) {
                 heightToSet -= (oldHeight - windowHeight);

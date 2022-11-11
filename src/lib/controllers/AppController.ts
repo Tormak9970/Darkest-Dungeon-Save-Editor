@@ -102,19 +102,17 @@ export class AppController {
         const revision = Object.values(get(dsonFiles))[0].header.revision;
         const changes = Object.entries(get(tabs));
 
-        // for (let i = 0; i < changes.length; i++) {
+        for (let i = 0; i < changes.length; i++) {
+            const fileName = changes[i][0];
+            const newData = changes[i][1];
+            console.log(newData)
+            const dWriter = new DsonWriter(newData as any, revision);
+            const dataBuf = dWriter.bytes();
 
-        // }
-
-        const fileName = changes[0][0];
-        const newData = changes[0][1];
-        console.log(newData)
-        const dWriter = new DsonWriter(newData as any, revision);
-        const dataBuf = dWriter.bytes();
-
-        const dFile = new DsonFile(new Reader(dataBuf), UnhashBehavior.POUNDUNHASH);
-        console.log(dFile);
-        console.log(dFile.asJson());
+            const dFile = new DsonFile(new Reader(dataBuf), UnhashBehavior.POUNDUNHASH);
+            console.log(dFile);
+            console.log(dFile.asJson());
+        }
 
         // discardChangesDisabled.set(true);
         // saveChangesDisabled.set(true);
