@@ -92,7 +92,7 @@ export class AppController {
     /**
      * Load up the existing backups
      */
-    static async loadBackups() { await AppController.backupsController.loadBackups(); }
+    static async loadBackups() { await AppController.backupsController.showBackupsModal(); }
 
     /**
      * Saves the current changes

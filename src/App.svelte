@@ -70,9 +70,6 @@
     async function findNames(e:Event) { await AppController.generateNames($gameDataDirPath, $modDataDirPath); }
 </script>
 
-<div class="wrap">
-	<SvelteToast target="top" options={{ initial: 0, intro: { y: -64 } }} />
-</div>
 <main>
 	<Titlebar />
     <ConfirmModal show={$showConfirmDiscard} message={"Are you sure you wan't to discard your changes?"} onConfirm={discardChanges} onCancel={async () => { $showConfirmDiscard = false; }} />
@@ -99,12 +96,15 @@
             <Tabs />
         </Pane>
         <Pane padding={"7px"}>
-            <div class="bottom-panel">
-                <ProgressBar width={"300px"} progress={$loaderProgress} />
-                <div style="width: 7px; height: 1px;" />
-                <Button text={"Discard Changes"} onClick={confirmDiscard} width={"120px"} disabled={$discardChangesDisabled} />
-                <div style="width: 7px; height: 1px;" />
-                <Button text={"Save Changes"} onClick={saveChanges} width={"100px"} disabled={$saveChangesDisabled} />
+            <div class="bottom-wrapper">
+                <div class="rights">© Travis Lane 2022</div>
+                <div class="bottom-panel">
+                    <ProgressBar width={"300px"} progress={$loaderProgress} />
+                    <div style="width: 7px; height: 1px;" />
+                    <Button text={"Discard Changes"} onClick={confirmDiscard} width={"120px"} disabled={$discardChangesDisabled} />
+                    <div style="width: 7px; height: 1px;" />
+                    <Button text={"Save Changes"} onClick={saveChanges} width={"100px"} disabled={$saveChangesDisabled} />
+                </div>
             </div>
         </Pane>
 	</div>
@@ -126,24 +126,6 @@
         color: var(--font-color);
     }
 
-    .wrap {
-        --toastContainerTop: 0.5rem;
-        --toastContainerRight: 0.5rem;
-        --toastContainerBottom: auto;
-        --toastContainerLeft: 0.5rem;
-        --toastWidth: 100%;
-        --toastMinHeight: 100px;
-        --toastPadding: 0 0.5rem;
-        font-size: 0.875rem;
-    }
-    @media (min-width: 40rem) {
-        .wrap {
-            --toastContainerRight: auto;
-            --toastContainerLeft: calc(50vw - 20rem);
-            --toastWidth: 40rem;
-        }
-    }
-
     .row {
         margin-top: 7px;
 
@@ -163,8 +145,21 @@
         align-items: center;
     }
 
-    .bottom-panel {
+    .bottom-wrapper {
         width: 100%;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .rights {
+        margin-left: 7px;
+        font-size: 12px;
+        opacity: 0.2;
+    }
+
+    .bottom-panel {
         display: flex;
         flex-direction: row;
         align-items: center;

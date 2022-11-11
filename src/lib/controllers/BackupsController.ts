@@ -33,6 +33,9 @@ type SaveData = {
     seconds: number
 }
 
+/**
+ * Controls all backup functionality
+ */
 export class BackupsController {
     private backupDir:string;
 
@@ -42,6 +45,10 @@ export class BackupsController {
         });
     }
 
+    /**
+     * Gets the current date and time
+     * @returns The current date and type
+     */
     private getBackupInfo() {
         const date = new Date();
 
@@ -63,11 +70,22 @@ export class BackupsController {
         };
     }
 
+    /**
+     * Formats the saveSlot and backupInfo in the desired way
+     * @param saveSlot The slot that is being backed up
+     * @param backupInfo The current time info
+     * @returns The saveSlot and backupInfo formatted in the desired manner
+     */
     private saveSchema(saveSlot:string, backupInfo: { day: number, month: number, year: number, hours: number, minutes: number, seconds: number }):string {
         const {day, month, year, hours, minutes, seconds} = backupInfo;
         return `${saveSlot}__${day}.${month}.${year}__${hours}.${minutes}.${seconds}`;
     }
 
+    /**
+     * Deconstructs the fileName into the desired data
+     * @param fileName FileName to deconstruct
+     * @returns The data decontructed form the fileName
+     */
     private deconstructSave(fileName:string): SaveData {
         const segs = fileName.substring(0, fileName.length-3).split("__");
         const saveSlot = segs[0];
@@ -85,6 +103,9 @@ export class BackupsController {
         }
     }
 
+    /**
+     * Creates a backup of the currently selected save directory
+     */
     async backup() {
         const loaderId = ToasterController.showLoaderToast("Generating backup...");
         const saveDir = get(saveDirPath);
@@ -116,7 +137,18 @@ export class BackupsController {
         }, 500);
     }
 
-    async loadBackups() {
+    /**
+     * Displays the backup selection modal
+     */
+    async showBackupsModal() {
+
+    }
+
+    /**
+     * Loads the provided backup and overwrites the current save
+     * @param fileName Path of the backup to load
+     */
+    async loadBackup(fileName:string) {
 
     }
 }
