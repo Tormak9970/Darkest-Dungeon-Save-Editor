@@ -104,13 +104,15 @@ export class AppController {
 
         for (let i = 0; i < changes.length; i++) {
             const fileName = changes[i][0];
+            const filePath = await path.join(get(saveDirPath), fileName);
             const newData = changes[i][1];
             console.log(newData)
             const dWriter = new DsonWriter(newData as any, revision);
             const dataBuf = dWriter.bytes();
 
+            // await fs.writeBinaryFile(filePath, dataBuf);
+
             const dFile = new DsonFile(new Reader(dataBuf), UnhashBehavior.POUNDUNHASH);
-            console.log(dFile);
             console.log(dFile.asJson());
         }
 
