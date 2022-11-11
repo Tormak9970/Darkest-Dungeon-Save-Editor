@@ -81,8 +81,4 @@
     .backup-info {
         font-size: 12px;
     }
-
-    .actions {
-
-    }
 </style>
