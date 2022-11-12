@@ -24,9 +24,9 @@ const app = new App({
   target: document.getElementById("app"),
 });
 
-// ! I don't know if this is correct
-getMatches().then((matches) => {
-  CliController.init(matches);
-});
+// // ! I don't know if this is correct
+// getMatches().then((matches) => {
+//   CliController.init(matches);
+// });
 
 export default app;

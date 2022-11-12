@@ -17,6 +17,15 @@
  */
 
 import type { ArgMatch, CliMatches, SubcommandMatch } from "@tauri-apps/api/cli";
+import { invoke } from '@tauri-apps/api/tauri'
+
+/**
+ * Logs a message to the terminal
+ * @param message The message to output
+ */
+function outputToTerminal(message:string) {
+    invoke('output_to_terminal', { message: message });
+}
 
 /**
  * The command line interface controller
@@ -62,6 +71,7 @@ export class CliController {
         }
 
         // TODO output 'msg' to terminal
+        outputToTerminal(msg);
     }
 
     private static async handleDecode(subCmd:SubcommandMatch, args:{[key:string]:ArgMatch}) {
