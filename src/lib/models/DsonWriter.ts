@@ -20,24 +20,11 @@ import { Writer } from "../utils/Writer";
 import { DsonHeader, DsonMeta1BlockEntry, DsonMeta2BlockEntry, MAGIC_NUMBER } from "./DsonFile";
 import { DsonTypes, FieldType } from "./DsonTypes";
 
-function concatBuffs(buffArr:ArrayBuffer[]): Uint8Array {
-    let res = new Uint8Array(buffArr[0]);
-
-    for (let i = 1; i < buffArr.length; i++) {
-        const idxUint = new Uint8Array(buffArr[i]);
-        const tmp = new Uint8Array(res.byteLength + idxUint.byteLength);
-
-        tmp.set(res, 0);
-        tmp.set(idxUint, res.byteLength);
-
-        res = tmp;
-    }
-
-    return res;
-}
-
 const encoder = new TextEncoder();
 
+/**
+ * Converts edited JSON data to a DarkestDungeon save file
+ */
 export class DsonWriter {
     header:DsonHeader;
     data:Writer;
@@ -235,6 +222,10 @@ export class DsonWriter {
         return writer.data;
     }
     
+    /**
+     * Gets the ArrayBuffer representing this save file
+     * @returns The ArrayBuffer representing this save file
+     */
     bytes(): ArrayBuffer {
         const writer = new Writer(new Int8Array(0x40 + this.meta1Entries.length * 0x10 + this.meta2Entries.length * 0x0C + this.data.length));
 

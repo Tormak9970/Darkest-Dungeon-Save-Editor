@@ -1,5 +1,8 @@
-import type { ItteratorGenerator, Itterator } from "../utils/Utils";
+import type { IteratorGenerator } from "../utils/Utils";
 
+/**
+ * Hardcoded names for certain FieldTypes
+ */
 const nameLUT = {
     '2': [
         [ "requirement_code" ]
@@ -47,6 +50,9 @@ const nameLUT = {
     ]
 }
 
+/**
+ * An enum of possible save file field data types
+ */
 export class FieldType {
     static TYPE_OBJECT = 0; // has a Meta1Block entry
     static TYPE_BOOL = 1; // 1 byte, 0x00 or 0x01
@@ -76,20 +82,40 @@ export class FieldType {
     // Unknown Type
     static TYPE_UNKNOWN = 12;
 
+    /**
+     * Gets the string name of the provided FieldType
+     * @param type The FieldType
+     * @returns The name of the provided FieldType
+     */
     static getKeyName(type:any): string {
         return Object.keys(this).find(key => this[key] == type);
     }
 }
 
+/**
+ * Class for checking DarkestDungeon save file field data types
+ */
 export class DsonTypes {
     private static encoder = new TextEncoder();
     private static decoder = new TextDecoder();
+
+    /**
+     * A map of hashes -> field names
+     */
     static NAME_TABLE = new Map<number, string>();
 
+    /**
+     * Adds a name to the NAME_TABLE map
+     * @param name the name to add
+     */
     static offerName(name:string): void {
         DsonTypes.NAME_TABLE.set(DsonTypes.stringHash(name), name);
     }
 
+    /**
+     * Adds a list names to the NAME_TABLE map
+     * @param names the names to add
+     */
     static offerNames(names:string[]): void {
         for (let i = 0; i < names.length; i++) {
             const name = names[i];
@@ -97,6 +123,11 @@ export class DsonTypes {
         }
     }
     
+    /**
+     * Gets the hash of the provided string
+     * @param str The string to hash
+     * @returns The hash of the provided string
+     */
     static stringHash(str:string): number {
         let hash = 0;
         const arr = DsonTypes.encoder.encode(str);
@@ -108,7 +139,13 @@ export class DsonTypes {
         return hash;
     }
 
-    static isA(type:any, nameGen:ItteratorGenerator): boolean {
+    /**
+     * Checks if a field is of type FieldType
+     * @param type The FieldType to check
+     * @param nameGen An IteratorGenerator to iterate through field hierarchies
+     * @returns True if the field is of type FieldType
+     */
+    static isA(type:any, nameGen:IteratorGenerator): boolean {
         const arr = nameLUT[type];
 
         if (!Array.isArray(arr)) {

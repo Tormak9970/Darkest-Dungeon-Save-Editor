@@ -21,10 +21,19 @@ import { toast } from "@zerodevx/svelte-toast";
 import { Buffer } from "buffer"
 import { ToasterController } from "../controllers/ToasterController";
 
+/**
+ * Represents a Parser
+ */
 interface Parser {
     parseFile(path:string, names:Set<string>): Promise<void>;
 }
 
+/**
+ * Takes an array of nested FileEntry objects and returns a 1-D list of file paths
+ * @param files An array of FileEntry objects
+ * @param res The resulting array
+ * @returns A 1-D list of file paths
+ */
 function recursiveFlatten(files:fs.FileEntry[], res:string[] = []): string[] {
 	for (let i = 0; i < files.length; i++) {
 		const file = files[i];
@@ -38,10 +47,16 @@ function recursiveFlatten(files:fs.FileEntry[], res:string[] = []): string[] {
 	return res;
 }
 
+/**
+ * Generates a list of property names used in DarkestDungeon save files
+ */
 export class NameGenerator {
     hardcodedNames = new Set<string>();
     parsers = new Map<string, Parser[]>();
 
+	/**
+	 * Sets up the NameGenerator
+	 */
     constructor() {
         // Info files (Heroes, Monsters)
 		this.addParser(".info.darkest", {
@@ -242,6 +257,11 @@ export class NameGenerator {
 		this.hardcodedNames.add("UNDEFINED");
     }
 
+	/**
+	 * Adds a parser to the list of parsers for the provided extension
+	 * @param ext The associated file extension
+	 * @param parser The parser to add
+	 */
     private addParser(ext:string, parser:Parser) {
         let parserList = this.parsers.get(ext);
 
@@ -249,6 +269,11 @@ export class NameGenerator {
         if (!parserList.includes(parser)) parserList.push(parser);
     }
 
+	/**
+	 * Adds a name based on the provided filePath to names
+	 * @param fPath The file path to use
+	 * @param names The current set of names
+	 */
     static async addBaseName(fPath:string, names:Set<string>) {
 		let fileName = await path.basename(fPath);
 		if (fileName.indexOf(".") > 0) {
@@ -257,6 +282,13 @@ export class NameGenerator {
 		names.add(fileName);
 	}
 
+	/**
+	 * Util method for adding names based on a recurring array -> key structure
+	 * @param data The file data
+	 * @param arrayName The name of the array in the JSON object
+	 * @param idString The name of the field to target in the array
+	 * @param set The current set of names
+	 */
     static addSimpleJSONArrayEntryIDs(data:Uint8Array, arrayName:string, idString:string, set:Set<string>) {
 		try {
 			const json = JSON.parse(Buffer.from(data).toString());
@@ -272,6 +304,11 @@ export class NameGenerator {
 		}
 	}
 
+	/**
+	 * Finds names of properties used in Darkest Dungeon save files
+	 * @param gameDirs The game directories to parse
+	 * @returns A set containing all found names
+	 */
     async findNames(gameDirs:string[]):Promise<Set<string>> {
         const names = new Set<string>();
 

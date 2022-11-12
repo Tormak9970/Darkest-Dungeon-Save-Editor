@@ -15,6 +15,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>
  */
+
+/**
+ * The available unhash behaviors
+ */
 export enum UnhashBehavior {
     NONE, // Don't unhash, works in all cases
     UNHASH, // Simple unhash, useful for simply looking at the files

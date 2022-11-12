@@ -32,7 +32,9 @@ const propsCol = "#a5c261";
 const otherCol = "#b6b3eb";
 const strCol = "#ffc66d";
 
-//Theme Style.
+/**
+ * The codemirror theme based on vsCode
+ */
 export const vsCodeTheme = EditorView.theme({
   "&": {
     backgroundColor: background
@@ -97,7 +99,9 @@ export const vsCodeTheme = EditorView.theme({
   }
 }, {dark: true});
 
-/// The highlighting style.
+/**
+ * The Highlighting associated with the vsCode theme
+ */
 export const vsCodeHighlightStyle = HighlightStyle.define([
     {
         tag: [
@@ -139,5 +143,3 @@ export const vsCodeHighlightStyle = HighlightStyle.define([
         color: propsCol
     }
 ]);
-
-export const vsCode = [vsCodeTheme, vsCodeHighlightStyle]

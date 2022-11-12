@@ -21,34 +21,20 @@ import path from "path";
 import { DsonToJsonController } from "../lib/controllers/DsonToJson";
 
 describe("Test Suite for DsonFile class", () => {
-    // const jsonController = new DsonToJsonController(path.join(__dirname, "test-resources", "persist.estate.json"), path.join(__dirname, "test-resources", "output.json"));
-    
 
     test("Header Tests", () => {
-        // expect(header.magicNr).toEqual(0xB101);
-        // expect(header.revision).toEqual(25721);
-        // expect(header.headerLength).toEqual(64);
-
-        // expect(header.meta1Size).toEqual(320);
-        // expect(header.numMeta1Entries).toEqual(20);
-        // expect(header.meta1Offset).toEqual(64);
-
-        // expect(header.numMeta2Entries).toEqual(51);
-        // expect(header.meta2Offset).toEqual(384);
-
-        // expect(header.dataLength).toEqual(712);
-        // expect(header.dataOffset).toEqual(996);
+        
     });
 
     test("Meta1Block Tests", () => {
-        // console.log(meta1Block);
+        
     });
 
     test("Meta2Block Tests", () => {
-        // console.log(meta2Block);
+        
     });
 
     test("Data Tests", () => {
-        // console.log(data);
+        
     });
 });

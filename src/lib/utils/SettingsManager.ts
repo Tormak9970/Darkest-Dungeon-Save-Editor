@@ -17,9 +17,15 @@
  */
 import { fs, path } from "@tauri-apps/api";
 
+/**
+ * A class for managing application settings
+ */
 export class SettingsManager {
     static settingsPath = "";
 
+    /**
+     * Sets `settingsPath` and copies default settings if necessary
+     */
     static async setSettingsPath() {
         const appDir = await path.appDir();
         // @ts-ignore
@@ -36,6 +42,10 @@ export class SettingsManager {
         SettingsManager.settingsPath = setsPath;
     }
 
+    /**
+     * Updates a field settings JSON with the provided data
+     * @param data Specifies the field to set and the data to set it to
+     */
     static async updateSettings(data: { prop: string, data: any }) {
         const settingsData = await fs.readTextFile(SettingsManager.settingsPath);
 

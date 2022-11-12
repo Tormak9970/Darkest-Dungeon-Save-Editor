@@ -22,25 +22,73 @@ import { FieldType } from "./DsonTypes";
 import type { UnhashBehavior } from "./UnhashBehavior";
 
 const HEADER_SIZE = 64;
+const decoder = new TextDecoder();
+
+/**
+ * The DarkestDungeon save file magic number
+ */
 export const MAGIC_NUMBER = 0xB101; //45313
 
+/**
+ * The header section of a DarkestDungeon save file
+ */
 export class DsonHeader {
+    /**
+     * The file's magic number
+     */
     magicNr:number;
+
+    /**
+     * The game version
+     */
     revision:number;
+
+    /**
+     * The headder length. Should be 64
+     */
     headerLength:number;
     
+    /**
+     * The size of the meta1 section of the save file
+     */
     meta1Size:number;
+
+    /**
+     * The number of entries in the save file's meta1 block
+     */
     numMeta1Entries:number;
+
+    /**
+     * The offset of this save file's meta1 block
+     */
     meta1Offset:number;
     
+    /**
+     * The number of entries in the save file's meta2 block
+     */
     numMeta2Entries:number;
+
+    /**
+     * The offset of this save file's meta2 block
+     */
     meta2Offset:number;
     
+    /**
+     * The length of this save file's data block
+     */
     dataLength:number;
+    
+    /**
+     * The offset of this save file's data block
+     */
     dataOffset:number;
 
     constructor() {}
 
+    /**
+     * Parses the associated data
+     * @param reader The reader to use
+     */
     parse(reader:Reader) {
         this.magicNr = reader.readUint32();
         if (this.magicNr != MAGIC_NUMBER) throw new Error(`Expected magic number to be ${MAGIC_NUMBER} but was ${this.magicNr}`);
@@ -72,11 +120,21 @@ export class DsonHeader {
     }
 }
 
+/**
+ * The meta1 block of a DarkestDungeon save file
+ */
 export class DsonMeta1Block {
+    /**
+     * This save file's meta1 entries
+     */
     entries:DsonMeta1BlockEntry[] = [];
 
     constructor() {}
 
+    /**
+     * Parses the associated data
+     * @param reader The reader to use
+     */
     parse(reader:Reader, header:DsonHeader) {
         for (let i = 0; i < header.numMeta1Entries; i++) {
             const entry = new DsonMeta1BlockEntry();
@@ -85,14 +143,37 @@ export class DsonMeta1Block {
         }
     }
 }
+
+/**
+ * An entry in the meta1 block of a DarkestDungeon save file
+ */
 export class DsonMeta1BlockEntry {
-    parentIdx:number; //-1 means root
+    /**
+     * The index of this entry's parent, -1 if root
+     */
+    parentIdx:number;
+
+    /**
+     * The meta2 entry index of this entry
+     */
     meta2EntryIdx:number;
+
+    /**
+     * The number of direct children of this entry
+     */
     numDirectChildren:number;
+
+    /**
+     * The number of all nested children of this entry
+     */
     numAllChildren:number;
 
     constructor() {}
 
+    /**
+     * Parses the associated data
+     * @param reader The reader to use
+     */
     parse(reader:Reader) {
         this.parentIdx = reader.readInt32();
         this.meta2EntryIdx = reader.readUint32();
@@ -102,11 +183,21 @@ export class DsonMeta1BlockEntry {
 }
 
 
+/**
+ * The meta2 block of a DarkestDungeon save file
+ */
 export class DsonMeta2Block {
+    /**
+     * This save file's meta2 entries
+     */
     entries:DsonMeta2BlockEntry[] = [];
 
     constructor() {}
 
+    /**
+     * Parses the associated data
+     * @param reader The reader to use
+     */
     parse(reader:Reader, header:DsonHeader) {
         for (let i = 0; i < header.numMeta2Entries; i++) {
             const entry = new DsonMeta2BlockEntry();
@@ -115,6 +206,11 @@ export class DsonMeta2Block {
         }
     }
 
+    /**
+     * Gets the next largest offset in entries, or -1 if there is none
+     * @param offset The current entry's offset
+     * @returns The next largest offset in entries, or -1 if there is none
+     */
     findNextSmallestOffset(offset:number): number {
         let bestIdx = -1;
         let bestOffset = -1;
@@ -128,16 +224,47 @@ export class DsonMeta2Block {
         return bestOffset;
     }
 }
+
+/**
+ * An entry in the meta2 block of a DarkestDungeon save file
+ */
 export class DsonMeta2BlockEntry {
+    /**
+     * The hash of this entry's name
+     */
     nameHash:number;
-    offset:number; //offset in data block relative to the dataOffset
+
+    /**
+     * The offset of this entry's data in the data block
+     */
+    offset:number;
+
+    /**
+     * This entry's field info. Contains multiple pieces of information attained by byte shifting
+     */
     fieldInfo:number;
+
+    /**
+     * Whether this entry is an object
+     */
     isObject:boolean;
-    nameLen:number; //name length with 0
+
+    /**
+     * Length of this entry's name + a trailing 0x00 byte
+     */
+    nameLen:number;
+
+    /**
+     * Index of this entry's meta2 block entry
+     */
     meta1BlockIdx:number;
 
     constructor() {}
 
+    /**
+     * Parses the associated data
+     * @param reader The reader to use
+     */
     parse(reader:Reader) {
         this.nameHash = reader.readUint32();
         this.offset = reader.readUint32();
@@ -148,13 +275,21 @@ export class DsonMeta2BlockEntry {
     }
 }
 
-const decoder = new TextDecoder();
-
+/**
+ * The data block of a DarkestDungeon save file
+ */
 export class DsonData {
+    /**
+     * The root fields of this save file
+     */
     rootFields:DsonField[];
     
     constructor() {}
 
+    /**
+     * Parses the associated data
+     * @param reader The reader to use
+     */
     parse(reader:Reader, dson:DsonFile, unhashBehavior:UnhashBehavior) {
         const fieldStack = new Stack<DsonField>();
         const parentIdxStack = new Stack<number>();
@@ -236,12 +371,24 @@ export class DsonData {
         this.rootFields = rootFields;
     }
 
+    /**
+     * Gets the name with the provided offset and length
+     * @param reader The Reader to use
+     * @param offset The offset of the name
+     * @param nameLength The length of this name + a trailing 0x00 byte
+     * @returns The read name
+     */
     static readName(reader:Reader, offset:number, nameLength:number): string {
         reader.seek(offset);
         const res = decoder.decode(reader.readSignedBytes(nameLength));
         return res;
     }
 
+    /**
+     * Reads the provided DsonField
+     * @param field The DsonField to read
+     * @returns The data of the DsonField
+     */
     writeField(field:DsonField):any {
         if (field.type == FieldType.TYPE_OBJECT) {
             return this.writeObject(field);
@@ -252,6 +399,11 @@ export class DsonData {
         }
     }
 
+    /**
+     * Reads the provided object field
+     * @param field The object field to read
+     * @returns The data of the object field
+     */
     writeObject(field:DsonField):any {
         if (field.children.length > 0) {
             const uniqueFields = new Set<string>();
@@ -271,6 +423,10 @@ export class DsonData {
         }
     }
 
+    /**
+     * Gets the json representation of this save file
+     * @returns The json representation of this save file
+     */
     asJson(): Object {
         const res = {};
 
@@ -283,6 +439,9 @@ export class DsonData {
     }
 }
 
+/**
+ * Represents a DarkestDungeon save file
+ */
 export class DsonFile {
     header:DsonHeader;
     meta1Block:DsonMeta1Block;
@@ -306,6 +465,10 @@ export class DsonFile {
         this.data.parse(new Reader(reader.data.slice(this.header.dataOffset, this.header.dataOffset + this.header.dataLength)), this, behavior);
     }
 
+    /**
+     * Gets the json representation of this save file
+     * @returns The json representation of this save file
+     */
     asJson(): Object {
         return this.data.asJson();
     }

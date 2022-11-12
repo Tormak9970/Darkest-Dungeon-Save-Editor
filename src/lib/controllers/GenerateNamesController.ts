@@ -17,10 +17,20 @@
  */
 import { fs, path } from "@tauri-apps/api";
 import { NameGenerator } from "../utils/NameGenerator";
+
+/**
+ * The controller class for field name finding
+ */
 export class GenerateNamesController {
     private DDSteamDir = "262060";
     nameGenerator:NameGenerator = new NameGenerator();
 
+    /**
+     * Finds save file field names by parsing DarkestDungeon game data and mod data
+     * @param gamePath The gameData path
+     * @param modPath The modData path, if specified
+     * @returns A set of names found
+     */
     async generateNames(gamePath:string, modPath:string): Promise<Set<string>> {
         const paths = []
         if (gamePath != "") {

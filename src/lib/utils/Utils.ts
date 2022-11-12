@@ -16,15 +16,29 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>
  */
 
+/**
+ * General utility class
+ */
 export class Utils {
     private static saveRegexA = new RegExp(".*persist\\..*\\.json");
     private static saveRegexB = new RegExp("novelty_tracker\\.json");
 
+    /**
+     * Checks if a file is a DarkestDungeon save file
+     * @param fileName The file name to check
+     * @returns True if the file is a valid save file
+     */
     static isSaveFile(fileName:string):boolean {
         return Utils.saveRegexA.test(fileName) || Utils.saveRegexB.test(fileName);
     }
 }
 
+/**
+ * 
+ * @param func The function to throttle
+ * @param wait The amount of time in between each run
+ * @returns A function that throttles the provided function
+ */
 export function throttle(func:any, wait:number) {
     let waiting = false;
     return function () {
@@ -41,16 +55,25 @@ export function throttle(func:any, wait:number) {
     };
 }
 
-export interface ItteratorGenerator {
-    get():Itterator;
+/**
+ * Generates an Iterator
+ */
+export interface IteratorGenerator {
+    get():Iterator;
 }
 
-export interface Itterator {
+/**
+ * Iterates over data
+ */
+export interface Iterator {
     hasNext():boolean;
     next():string;
 }
 
-class NameItteratorGenerator implements ItteratorGenerator {
+/**
+ * An IteratorGenerator for NameIterators
+ */
+class NameIteratorGenerator implements IteratorGenerator {
     private stack:Stack<string>;
 
     constructor(stack:Stack<string>) {
@@ -58,11 +81,14 @@ class NameItteratorGenerator implements ItteratorGenerator {
     }
 
     get() {
-        return new NameItterator(this.stack);
+        return new NameIterator(this.stack);
     }
 }
 
-class NameItterator implements Itterator {
+/**
+ * An Iterator for nameStacks
+ */
+class NameIterator implements Iterator {
     private stack:Stack<string>;
     private curIdx:number;
 
@@ -80,10 +106,19 @@ class NameItterator implements Itterator {
     }
 }
 
+/**
+ * Gets a new NameIteratorGenerator based on the provided stack
+ * @param stack A stack of type string
+ * @returns A new NameIteratorGenerator
+ */
 export function getNameIttr(stack:Stack<string>) {
-    return new NameItteratorGenerator(stack);
+    return new NameIteratorGenerator(stack);
 }
 
+/**
+ * A generic stack data structure
+ * @param T The type of the stack
+ */
 export class Stack<T> {
     private stack:T[] = [];
 

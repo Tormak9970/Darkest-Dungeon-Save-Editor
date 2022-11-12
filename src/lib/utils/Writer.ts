@@ -22,6 +22,9 @@ let GLOBAL_ENDIANNESS = true;
 
 const encoder = new TextEncoder();
 
+/**
+ * A binary Writer for ease of use
+ */
 export class Writer {
     data: ArrayBuffer;
     offset: number;

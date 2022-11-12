@@ -16,13 +16,16 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>
  */
 import { Reader } from "../utils/Reader";
-import type { Itterator, ItteratorGenerator } from "../utils/Utils";
+import type { Iterator, IteratorGenerator } from "../utils/Utils";
 import { DsonFile, MAGIC_NUMBER } from "./DsonFile";
 import { DsonTypes, FieldType } from "./DsonTypes";
 import { UnhashBehavior } from "./UnhashBehavior";
 
 const decoder = new TextDecoder();
 
+/**
+ * Represents a field in a DarkestDungeon save file
+ */
 export class DsonField {
     dataStartInFile:number;
     meta1EntryIdx = -1;
@@ -45,6 +48,11 @@ export class DsonField {
         this.children = [];
     }
 
+    /**
+     * Attempts to determine the data type of this field
+     * @param behavior The unhash behavior
+     * @returns True if type was determined
+     */
     guessType(behavior:UnhashBehavior): boolean {
         if (this.parseHardcodedType(behavior)) {
             return true;
@@ -269,25 +277,6 @@ export class DsonField {
         return false;
     }
 
-    public getExtraComments(): string {
-        let res = "";
-
-        res += "Type: ";
-        res += FieldType.getKeyName(this.type);
-
-        if (this.hashedValue != null) {
-            res += ", Hashed Integer(s): ";
-            res += this.hashedValue;
-        }
-
-        if (JSON.stringify(this.type) == JSON.stringify(FieldType.TYPE_UNKNOWN)) {
-            res += ", Raw Data: ";
-            res += Buffer.from(this.rawData).toString('hex');
-        }
-
-        return res;
-    }
-
     private rawSize():number {
         return this.rawData.length;
     }
@@ -300,6 +289,11 @@ export class DsonField {
         return (4 - (this.dataStartInFile % 4)) % 4;
     }
 
+    /**
+     * Adds a child field if there is space available
+     * @param child The child to add
+     * @returns True if child was added
+     */
     addChild(child:DsonField): boolean {
         if (this.children.length < this.numChildren) {
             this.children.push(child);
@@ -309,15 +303,28 @@ export class DsonField {
             return false;
         }
     }
+
+    /**
+     * Sets this field's number of children
+     * @param numChildren The number of children
+     */
     setNumChildren(numChildren:number): void { this.numChildren = numChildren; }
+
+    /**
+     * Checks if this field has all of its child fields
+     * @returns True if this field has all of its child fields
+     */
     hasAllChildren(): boolean { return this.children.length == this.numChildren; }
 
     private nameIterator() {
-        return new FieldItteratorGenerator(this);
+        return new FieldIteratorGenerator(this);
     }
 }
 
-class FieldItteratorGenerator implements ItteratorGenerator {
+/**
+ * An IteratorGenerator for FieldIterators
+ */
+class FieldIteratorGenerator implements IteratorGenerator {
     private field:{name:string, parent:DsonField};
 
     constructor(field:DsonField) {
@@ -325,11 +332,14 @@ class FieldItteratorGenerator implements ItteratorGenerator {
     }
 
     get() {
-        return new FieldItterator(this.field);
+        return new FieldIterator(this.field);
     }
 }
 
-class FieldItterator implements Itterator {
+/**
+ * An Iterator for DsonField hierarchies
+ */
+class FieldIterator implements Iterator {
     private field:{name:string, parent:DsonField};
 
     constructor(field:{name:string, parent:DsonField}) {
