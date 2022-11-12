@@ -17,9 +17,16 @@
  */
 import "./style.css";
 import App from "./App.svelte";
+import { getMatches } from '@tauri-apps/api/cli'
+import { CliController } from "./lib/controllers/CliController";
 
 const app = new App({
   target: document.getElementById("app"),
+});
+
+// ! I don't know if this is correct
+getMatches().then((matches) => {
+  CliController.init(matches);
 });
 
 export default app;
