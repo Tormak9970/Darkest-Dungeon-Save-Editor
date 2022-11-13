@@ -93,18 +93,21 @@
               "name": "names",
               "short": "n",
               "takesValue": true,
-              "multiple": false
+              "multiple": false,
+              "required": true
             },
             {
               "name": "output",
               "short": "o",
               "takesValue": true,
-              "multiple": false
+              "multiple": false,
+              "required": true
             },
             {
               "name": "fileName",
               "index": 1,
-              "takesValue": true
+              "takesValue": true,
+              "required": true
             }
           ]
         },
@@ -117,12 +120,14 @@
               "name": "output",
               "short": "o",
               "takesValue": true,
-              "multiple": false
+              "multiple": false,
+              "required": true
             },
             {
               "name": "fileName",
               "index": 1,
-              "takesValue": true
+              "takesValue": true,
+              "required": true
             }
           ]
         },
@@ -135,22 +140,17 @@
               "name": "output",
               "short": "o",
               "takesValue": true,
-              "multiple": false
+              "multiple": false,
+              "required": true
             },
             {
               "name": "dirs",
               "index": 1,
               "takesValue": true,
-              "multiple": true
+              "multiple": true,
+              "required": true
             }
           ]
-        },
-        "sheets": {
-          "description": "",
-          "longDescription": "",
-          "beforeHelp": "",
-          "afterHelp": "",
-          "args": []
         }
       }
     },

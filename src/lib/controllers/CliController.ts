@@ -16,8 +16,15 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>
  */
 
+import { fs } from "@tauri-apps/api";
 import type { ArgMatch, CliMatches, SubcommandMatch } from "@tauri-apps/api/cli";
 import { invoke } from '@tauri-apps/api/tauri'
+import { DsonFile } from "../models/DsonFile";
+import { DsonTypes } from "../models/DsonTypes";
+import { DsonWriter } from "../models/DsonWriter";
+import { UnhashBehavior } from "../models/UnhashBehavior";
+import { Reader } from "../utils/Reader";
+import { GenerateNamesController } from "./GenerateNamesController";
 
 /**
  * Logs a message to the terminal
@@ -31,6 +38,8 @@ function outputToTerminal(message:string) {
  * The command line interface controller
  */
 export class CliController {
+    static namesController = new GenerateNamesController();
+
     /**
      * Determines which command to run and passes it the required arguements
      * @param matches The cli matches
@@ -44,16 +53,13 @@ export class CliController {
                 await CliController.handleShow(subCmd, args);
                 break;
             case "decode":
-                await CliController.handleDecode(subCmd, args);
+                await CliController.handleDecode(args);
                 break;
             case "encode":
-                await CliController.handleEncode(subCmd, args);
+                await CliController.handleEncode(args);
                 break;
             case "names":
-                await CliController.handleNames(subCmd, args);
-                break;
-            case "sheets":
-                await CliController.handleSheets(subCmd, args);
+                await CliController.handleNames(args);
                 break;
         }
     }
@@ -74,19 +80,65 @@ export class CliController {
         outputToTerminal(msg);
     }
 
-    private static async handleDecode(subCmd:SubcommandMatch, args:{[key:string]:ArgMatch}) {
+    private static async handleDecode(args:{[key:string]:ArgMatch}) {
+        const namesPath = args['names'];
+        const outputPath = args['output'];
+        const fileName = args['fileName'];
 
+        if (!!namesPath && !!outputPath && !!fileName) {
+            const names = (await fs.readTextFile(namesPath.value as string)).split('\n');
+
+            DsonTypes.offerNames(Array.from(names));
+
+            const data = await fs.readBinaryFile(fileName.value as string);
+            const reader = new Reader(data);
+            const dson = new DsonFile(reader, UnhashBehavior.POUNDUNHASH);
+
+            await fs.writeTextFile(outputPath.value as string, JSON.stringify(dson.asJson(), null, "\t"));
+            
+            outputToTerminal("Save file decode complete!");
+        } else {
+            outputToTerminal("Missing required arguments");
+        }
     }
 
-    private static async handleEncode(subCmd:SubcommandMatch, args:{[key:string]:ArgMatch}) {
+    private static async handleEncode(args:{[key:string]:ArgMatch}) {
+        const outputPath = args['output'];
+        const fileName = args['fileName'];
 
+        if (!!outputPath && !!fileName) {
+            const data = await fs.readTextFile(fileName.value as string);
+            const dWriter = new DsonWriter(JSON.parse(data), 0x00);
+            const dataBuf = dWriter.bytes();
+
+            await fs.writeBinaryFile(outputPath.value as string, dataBuf);
+
+            outputToTerminal("File encoding complete!");
+        } else {
+            outputToTerminal("Missing required arguments");
+        }
     }
 
-    private static async handleNames(subCmd:SubcommandMatch, args:{[key:string]:ArgMatch}) {
+    private static async handleNames(args:{[key:string]:ArgMatch}) {
+        const outputPath = args['output'];
+        const dirs = args['dirs'];
 
-    }
+        if (!!outputPath && !!dirs) {
+            const dataDirs = dirs.value as string[];
 
-    private static async handleSheets(subCmd:SubcommandMatch, args:{[key:string]:ArgMatch}) {
+            let names: Set<string>;
 
+            if (dataDirs.length == 1) {
+                names = await CliController.namesController.generateNames(dataDirs[0], "");
+            } else {
+                names = await CliController.namesController.generateNames(dataDirs[0], dataDirs[1]);
+            }
+
+            await fs.writeTextFile(outputPath.value as string, Array.from(names).join('\n'));
+            
+            outputToTerminal("Names generation complete!");
+        } else {
+            outputToTerminal("Missing required arguments");
+        }
     }
 }
