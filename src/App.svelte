@@ -30,6 +30,9 @@
     import ConfirmModal from "./components/modals/ConfirmModal.svelte";
     import LoadBackupModal from "./components/modals/LoadBackupModal.svelte";
     import ReloadButton from "./components/interactable/ReloadButton.svelte";
+    import AboutModal from "./components/modals/AboutModal.svelte";
+
+    $: dispAboutModal = false
 
     async function loadSave(e:Event) {
         if ($gameDataDirPath == "") {
@@ -73,12 +76,15 @@
     async function loadBackup(e:Event) { await AppController.loadBackups(); }
 
     async function findNames(e:Event) { await AppController.generateNames($gameDataDirPath, $modDataDirPath); }
+
+    function showAboutModal(e:Event) { dispAboutModal = true; }
 </script>
 
 <main>
 	<Titlebar />
     <ConfirmModal width={"250px"} show={$showConfirmDiscard} message={"Are you sure you want to discard your changes?"} onConfirm={discardChanges} onCancel={async () => { $showConfirmDiscard = false; }} />
     <ConfirmModal width={"300px"} show={$showConfirmReload} message={"Are you sure you want to reload? You will loose your changes."} onConfirm={reload} onCancel={async () => { $showConfirmReload = false; }} />
+    <AboutModal show={dispAboutModal} closeFunc={() => { dispAboutModal = false; }} />
     <LoadBackupModal />
 	<div class="content">
         <Pane title="Paths" width={"calc(100% - 34px)"}>
@@ -105,6 +111,8 @@
             <div class="bottom-wrapper">
                 <div class="rights">© Travis Lane 2022</div>
                 <div class="bottom-panel">
+                    <Button text={"About"} onClick={showAboutModal} width={"60px"} />
+                    <div style="width: 7px; height: 1px;" />
                     <ReloadButton onClick={confirmReload} />
                     <div style="width: 7px; height: 1px;" />
                     <ProgressBar width={"300px"} progress={$loaderProgress} />

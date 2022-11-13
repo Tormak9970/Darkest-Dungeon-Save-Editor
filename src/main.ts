@@ -19,14 +19,20 @@ import "./style.css";
 import App from "./App.svelte";
 import { getMatches } from '@tauri-apps/api/cli'
 import { CliController } from "./lib/controllers/CliController";
+import { getAll } from "@tauri-apps/api/window";
 
 const app = new App({
   target: document.getElementById("app"),
 });
 
-// // ! I don't know if this is correct
-// getMatches().then((matches) => {
-//   CliController.init(matches);
-// });
+getMatches().then((matches) => {
+  const windows = getAll();
+  if (matches?.subcommand?.matches?.args) {
+    CliController.init(matches);
+  } else {
+    const mainWindow = windows.find(window => window.label == "main");
+    mainWindow.show();
+  }
+});
 
 export default app;

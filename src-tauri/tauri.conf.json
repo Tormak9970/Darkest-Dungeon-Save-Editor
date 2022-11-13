@@ -35,6 +35,10 @@
           "$DATA/**"
         ]
       },
+      "shell": {
+        "all": false,
+        "open": true
+      },
       "window": { "all": true }
     },
     "bundle": {
@@ -163,13 +167,20 @@
     },
     "windows": [
       {
+        "label": "main",
         "fullscreen": false,
         "height": 740,
         "resizable": true,
         "title": "DarkestDungeon Save Editor",
         "width": 1170,
         "decorations": false,
-        "center": true
+        "center": true,
+        "visible": false
+      },
+      {
+        "label": "cli-runner",
+        "decorations": false,
+        "visible": false
       }
     ]
   }
