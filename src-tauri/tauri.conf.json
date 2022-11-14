@@ -70,94 +70,103 @@
       }
     },
     "cli": {
-      "description": "Darkest Dungeon Save Editor  Copyright (C) 2022  Travis Lane\nThis program comes with ABSOLUTELY NO WARRANTY; for details type `show w'.\nThis is free software, and you are welcome to redistribute it\nunder certain conditions; type `show c' for details.\n\n use --help for details",
+      "description": "Darkest Dungeon Save Editor  Copyright (C) 2022  Travis Lane\nThis program comes with ABSOLUTELY NO WARRANTY; for details type `ddseditor show w'.\nThis is free software, and you are welcome to redistribute it\nunder certain conditions; type `ddseditor show c' for details.\n\n use --help for details",
       "longDescription": "",
-      "beforeHelp": "Darkest Dungeon Save Editor  Copyright (C) 2022  Travis Lane\nThis program comes with ABSOLUTELY NO WARRANTY; for details type `show w'.\nThis is free software, and you are welcome to redistribute it\nunder certain conditions; type `show c' for details.",
+      "beforeHelp": "Darkest Dungeon Save Editor  Copyright (C) 2022  Travis Lane\nThis program comes with ABSOLUTELY NO WARRANTY; for details type `ddseditor show w'.\nThis is free software, and you are welcome to redistribute it\nunder certain conditions; type `ddseditor show c' for details.",
       "afterHelp": "",
       "args": [],
       "subcommands": {
-        "show": {
+        "ddseditor": {
           "description": "",
           "longDescription": "",
+          "beforeHelp": "",
           "afterHelp": "",
+          "args": [],
           "subcommands": {
-            "w": {
-              "description": "Outputs the warranty information associated with this application",
-              "longDescription": "Outputs the warranty information associated with this application"
+            "show": {
+              "description": "",
+              "longDescription": "",
+              "afterHelp": "",
+              "subcommands": {
+                "w": {
+                  "description": "Outputs the warranty information associated with this application",
+                  "longDescription": "Outputs the warranty information associated with this application"
+                },
+                "c": {
+                  "description": "Outputs the basic coditions of redistribution associated with this application",
+                  "longDescription": "Outputs the basic coditions of redistribution associated with this application"
+                }
+              }
             },
-            "c": {
-              "description": "Outputs the basic coditions of redistribution associated with this application",
-              "longDescription": "Outputs the basic coditions of redistribution associated with this application"
+            "decode": {
+              "description": "Decodes a provided DarkestDungeon save file into a JSON file",
+              "longDescription": "Decodes a provided DarkestDungeon save file into a JSON file",
+              "afterHelp": "you can run the command with ddseditor decode [--names, -n <namefile>] [--output, -o <outfile>] filename\nwhere:\n<namefile> is the txt cache of names\n<outfile> is the path of the output file\nfilename is the file to decode",
+              "args": [
+                {
+                  "name": "names",
+                  "short": "n",
+                  "takesValue": true,
+                  "multiple": false,
+                  "required": true
+                },
+                {
+                  "name": "output",
+                  "short": "o",
+                  "takesValue": true,
+                  "multiple": false,
+                  "required": true
+                },
+                {
+                  "name": "fileName",
+                  "index": 1,
+                  "takesValue": true,
+                  "required": true
+                }
+              ]
+            },
+            "encode": {
+              "description": "Encodes a provided JSON file into a DarkestDungeon save file",
+              "longDescription": "Encodes a provided JSON file into a DarkestDungeon save file",
+              "afterHelp": "you can run the command with ddseditor encode [--output, -o <outfile>] filename\nwhere:\n<outfile> is the path of the output file\nfilename is the file to decode",
+              "args": [
+                {
+                  "name": "output",
+                  "short": "o",
+                  "takesValue": true,
+                  "multiple": false,
+                  "required": true
+                },
+                {
+                  "name": "fileName",
+                  "index": 1,
+                  "takesValue": true,
+                  "required": true
+                }
+              ]
+            },
+            "names": {
+              "description": "Generates a txt file containing the names of DarkestDungeon save file fields",
+              "longDescription": "Generates a txt file containing the names of DarkestDungeon save file fields",
+              "afterHelp": "you can run the command with ddseditor names [--output, -o <outfile>] [...dirs]\nwhere:\n<outfile> is the path of the output file\n[..dirs] is a space sperated list of directories containing game data",
+              "args": [
+                {
+                  "name": "output",
+                  "short": "o",
+                  "takesValue": true,
+                  "multiple": false,
+                  "required": true
+                },
+                {
+                  "name": "dirs",
+                  "index": 1,
+                  "takesValue": true,
+                  "multiple": true,
+                  "required": true
+                }
+              ]
             }
           }
-        },
-        "decode": {
-          "description": "Decodes a provided DarkestDungeon save file into a JSON file",
-          "longDescription": "Decodes a provided DarkestDungeon save file into a JSON file",
-          "afterHelp": "you can run the command with ./app decode [--names, -n <namefile>] [--output, -o <outfile>] filename\nwhere:\n<namefile> is the txt cache of names\n<outfile> is the path of the output file\nfilename is the file to decode",
-          "args": [
-            {
-              "name": "names",
-              "short": "n",
-              "takesValue": true,
-              "multiple": false,
-              "required": true
-            },
-            {
-              "name": "output",
-              "short": "o",
-              "takesValue": true,
-              "multiple": false,
-              "required": true
-            },
-            {
-              "name": "fileName",
-              "index": 1,
-              "takesValue": true,
-              "required": true
-            }
-          ]
-        },
-        "encode": {
-          "description": "Encodes a provided JSON file into a DarkestDungeon save file",
-          "longDescription": "Encodes a provided JSON file into a DarkestDungeon save file",
-          "afterHelp": "you can run the command with ./app encode [--output, -o <outfile>] filename\nwhere:\n<outfile> is the path of the output file\nfilename is the file to decode",
-          "args": [
-            {
-              "name": "output",
-              "short": "o",
-              "takesValue": true,
-              "multiple": false,
-              "required": true
-            },
-            {
-              "name": "fileName",
-              "index": 1,
-              "takesValue": true,
-              "required": true
-            }
-          ]
-        },
-        "names": {
-          "description": "Generates a txt file containing the names of DarkestDungeon save file fields",
-          "longDescription": "Generates a txt file containing the names of DarkestDungeon save file fields",
-          "afterHelp": "you can run the command with ./app names [--output, -o <outfile>] [...dirs]\nwhere:\n<outfile> is the path of the output file\n[..dirs] is a space sperated list of directories containing game data",
-          "args": [
-            {
-              "name": "output",
-              "short": "o",
-              "takesValue": true,
-              "multiple": false,
-              "required": true
-            },
-            {
-              "name": "dirs",
-              "index": 1,
-              "takesValue": true,
-              "multiple": true,
-              "required": true
-            }
-          ]
         }
       }
     },

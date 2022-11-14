@@ -45,22 +45,26 @@ export class CliController {
      * @param matches The cli matches
      */
     static async init(matches:CliMatches) {
-        const subCmd = matches.subcommand;
-        const args = subCmd.matches.args;
-        const cmd = subCmd.name;
-        switch (cmd) {
-            case "show":
-                await CliController.handleShow(subCmd, args);
-                break;
-            case "decode":
-                await CliController.handleDecode(args);
-                break;
-            case "encode":
-                await CliController.handleEncode(args);
-                break;
-            case "names":
-                await CliController.handleNames(args);
-                break;
+        const progCmd = matches.subcommand;
+        
+        if (progCmd) {
+            const subCmd = progCmd.matches.subcommand;
+            const args = subCmd.matches.args;
+            const cmd = subCmd.name;
+            switch (cmd) {
+                case "show":
+                    await CliController.handleShow(subCmd, args);
+                    break;
+                case "decode":
+                    await CliController.handleDecode(args);
+                    break;
+                case "encode":
+                    await CliController.handleEncode(args);
+                    break;
+                case "names":
+                    await CliController.handleNames(args);
+                    break;
+            }
         }
     }
 
