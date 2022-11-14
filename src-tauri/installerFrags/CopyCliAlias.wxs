@@ -3,7 +3,7 @@
     <Fragment>
         <DirectoryRef Id="TARGETDIR">
             <Component Id="CMP_CopyCliAlias" Guid="*">
-                <File Id="FILE_CliAliasBat" Source="ddseditor.bat" KeyPath="yes">
+                <File Id="FILE_CliAliasBat" Source="C:\\Users\\Tormak\\Documents\\GitHub\\DarkestDungeon-Save-Editor\\ddseditor.bat">
                     <CopyFile Id="Copy_CliAliasBat" DestinationDirectory="TARGETDIR" DestinationName="ddseditor.bat" />
                 </File>
             </Component>
