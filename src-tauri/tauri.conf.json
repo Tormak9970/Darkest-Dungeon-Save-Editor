@@ -66,14 +66,6 @@
         "timestampUrl": "",
         "webviewInstallMode": {
           "type": "offlineInstaller"
-        },
-        "wix": {
-          "fragmentPaths": [
-            "./installerFrags/CopyCliAlias.wxs"
-          ],
-          "componentRefs": [
-            "CMP_CopyCliAlias"
-          ]
         }
       }
     },
