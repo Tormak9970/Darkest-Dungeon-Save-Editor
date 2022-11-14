@@ -44,12 +44,12 @@
     "bundle": {
       "active": true,
       "category": "DeveloperTool",
-      "copyright": "",
+      "copyright": "Copyright Travis Lane 2022",
       "deb": { "depends": [] },
       "externalBin": [],
       "icon": [ "icons/32x32.png", "icons/128x128.png", "icons/128x128@2x.png", "icons/icon.icns", "icons/icon.ico" ],
       "identifier": "dev.tormak.darkest-dungeon-save-editor",
-      "longDescription": "",
+      "longDescription": "The Darkest Dungeon Save Editor is a tool for decoding and encoding game save files as well as hash generation.",
       "macOS": {
         "entitlements": null,
         "exceptionDomain": "",
@@ -58,12 +58,18 @@
         "signingIdentity": null
       },
       "resources": ["../settings.json"],
-      "shortDescription": "",
+      "shortDescription": "The Darkest Dungeon Save Editor is a tool for decoding and encoding game save files as well as hash generation.",
       "targets": "all",
       "windows": {
         "certificateThumbprint": null,
         "digestAlgorithm": "sha256",
-        "timestampUrl": ""
+        "timestampUrl": "",
+        "webviewInstallMode": {
+          "type": "offlineInstaller"
+        },
+        "wix": {
+          "license": "../LICENSE"
+        }
       }
     },
     "cli": {
