@@ -30,12 +30,10 @@ getMatches().then((matches) => {
   const bArgsLen = Object.keys(matches?.args).length > 0;
   const cmdName = matches?.subcommand?.name;
   
-  mainWindow.show();
-  console.log(matches);
   if (bArgsLen || (cmdName && cmdName != "")) {
     CliController.init(matches, mainWindow);
   } else {
-    // mainWindow.show();
+    mainWindow.show();
   }
 });
 
