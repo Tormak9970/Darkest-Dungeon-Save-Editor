@@ -19,18 +19,22 @@ import "./style.css";
 import App from "./App.svelte";
 import { getMatches } from '@tauri-apps/api/cli'
 import { CliController } from "./lib/controllers/CliController";
-import { getAll } from "@tauri-apps/api/window";
+import { getCurrent } from "@tauri-apps/api/window";
 
 const app = new App({
   target: document.getElementById("app"),
 });
 
 getMatches().then((matches) => {
-  const windows = getAll();
-  if (matches?.subcommand?.matches?.args) {
-    CliController.init(matches);
+  const mainWindow = getCurrent();
+  const baseArgs = matches?.args;
+  const bArgsLen = Object.keys(baseArgs).length > 0;
+  const cmdArgs = matches?.subcommand?.matches?.subcommand?.matches.args;
+  const cArgsLen = cmdArgs ? Object.keys(cmdArgs).length > 0 : false;
+  
+  if ((baseArgs && bArgsLen) || (cmdArgs && cArgsLen)) {
+    CliController.init(matches, mainWindow);
   } else {
-    const mainWindow = windows.find(window => window.label == "main");
     mainWindow.show();
   }
 });

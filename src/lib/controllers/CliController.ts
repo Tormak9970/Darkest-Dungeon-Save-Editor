@@ -19,6 +19,7 @@
 import { fs } from "@tauri-apps/api";
 import type { ArgMatch, CliMatches, SubcommandMatch } from "@tauri-apps/api/cli";
 import { invoke } from '@tauri-apps/api/tauri'
+import type { WebviewWindow } from "@tauri-apps/api/window";
 import { DsonFile } from "../models/DsonFile";
 import { DsonTypes } from "../models/DsonTypes";
 import { DsonWriter } from "../models/DsonWriter";
@@ -44,8 +45,10 @@ export class CliController {
      * Determines which command to run and passes it the required arguements
      * @param matches The cli matches
      */
-    static async init(matches:CliMatches) {
+    static async init(matches:CliMatches, mainWindow:WebviewWindow) {
         const progCmd = matches.subcommand;
+        
+        outputToTerminal("Checking arguments...");
         
         if (progCmd) {
             const subCmd = progCmd.matches.subcommand;
@@ -53,7 +56,7 @@ export class CliController {
             const cmd = subCmd.name;
             switch (cmd) {
                 case "show":
-                    await CliController.handleShow(subCmd, args);
+                    await CliController.handleShow(subCmd);
                     break;
                 case "decode":
                     await CliController.handleDecode(args);
@@ -66,9 +69,13 @@ export class CliController {
                     break;
             }
         }
+        
+        outputToTerminal("Done!");
+
+        await mainWindow.close();
     }
 
-    private static async handleShow(subCmd:SubcommandMatch, args:{[key:string]:ArgMatch}) {
+    private static async handleShow(subCmd:SubcommandMatch) {
         const cmdName = subCmd.matches.subcommand.name;
         let msg = "";
 
@@ -80,7 +87,6 @@ export class CliController {
             msg = "Invalid command. Please use \"show w\" or \"show c\"";
         }
 
-        // TODO output 'msg' to terminal
         outputToTerminal(msg);
     }
 
