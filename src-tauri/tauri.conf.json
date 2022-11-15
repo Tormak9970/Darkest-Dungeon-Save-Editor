@@ -70,14 +70,14 @@
       }
     },
     "cli": {
-      "description": "Darkest Dungeon Save Editor  Copyright (C) 2022  Travis Lane\nThis program comes with ABSOLUTELY NO WARRANTY; for details type `ddseditor show w'.\nThis is free software, and you are welcome to redistribute it\nunder certain conditions; type `ddseditor show c' for details.\n\n use --help for details",
+      "description": "",
       "longDescription": "",
       "beforeHelp": "Darkest Dungeon Save Editor  Copyright (C) 2022  Travis Lane\nThis program comes with ABSOLUTELY NO WARRANTY; for details type `ddseditor show w'.\nThis is free software, and you are welcome to redistribute it\nunder certain conditions; type `ddseditor show c' for details.",
       "afterHelp": "",
       "args": [],
       "subcommands": {
         "show": {
-          "description": "",
+          "description": "show w for warranty info and show c for conditions. use show --help for more info",
           "longDescription": "",
           "afterHelp": "",
           "subcommands": {

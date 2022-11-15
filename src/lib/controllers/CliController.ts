@@ -68,6 +68,7 @@ export class CliController {
         } else if (Object.entries(args).length > 0) {
             const arg = Object.entries(args)[0];
             switch (arg[0]) {
+                case "version":
                 case "help":
                     outputToTerminal(arg[1].value as string);
                     break;
