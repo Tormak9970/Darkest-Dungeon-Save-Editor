@@ -47,7 +47,7 @@ export class CliController {
      */
     static async init(matches:CliMatches, mainWindow:WebviewWindow) {
         const progCmd = matches.subcommand;
-        const args = matches.args;
+        const args = progCmd.matches.args;
         const cmdName = progCmd?.name;
         
         if (cmdName && cmdName != "") {
@@ -75,7 +75,7 @@ export class CliController {
             }
         }
         
-        outputToTerminal("\n\nDone!\n\n");
+        outputToTerminal("\nDone!");
 
         await mainWindow.close();
     }
@@ -100,7 +100,7 @@ export class CliController {
         const outputPath = args['output'];
         const fileName = args['fileName'];
 
-        if (!!namesPath && !!outputPath && !!fileName) {
+        if (namesPath.value as string != "" && outputPath.value as string != "" && fileName.value as string != "") {
             const names = (await fs.readTextFile(namesPath.value as string)).split('\n');
 
             DsonTypes.offerNames(Array.from(names));
@@ -121,7 +121,7 @@ export class CliController {
         const outputPath = args['output'];
         const fileName = args['fileName'];
 
-        if (!!outputPath && !!fileName) {
+        if (outputPath.value as string != "" && fileName.value as string != "") {
             const data = await fs.readTextFile(fileName.value as string);
             const dWriter = new DsonWriter(JSON.parse(data), 0x00);
             const dataBuf = dWriter.bytes();
@@ -138,7 +138,7 @@ export class CliController {
         const outputPath = args['output'];
         const dirs = args['dirs'];
 
-        if (!!outputPath && !!dirs) {
+        if (outputPath.value as string != "" && dirs.value as string != "") {
             const dataDirs = dirs.value as string[];
 
             let names: Set<string>;
