@@ -32,6 +32,8 @@ getMatches().then((matches) => {
   const cmdArgs = matches?.subcommand?.matches?.subcommand?.matches.args;
   const cArgsLen = cmdArgs ? Object.keys(cmdArgs).length > 0 : false;
   
+  // mainWindow.show();
+  // console.log(matches);
   if ((baseArgs && bArgsLen) || (cmdArgs && cArgsLen)) {
     CliController.init(matches, mainWindow);
   } else {

@@ -50,25 +50,25 @@ export class CliController {
         
         outputToTerminal("Checking arguments...");
         
-        if (progCmd) {
-            const subCmd = progCmd.matches.subcommand;
-            const args = subCmd.matches.args;
-            const cmd = subCmd.name;
-            switch (cmd) {
-                case "show":
-                    await CliController.handleShow(subCmd);
-                    break;
-                case "decode":
-                    await CliController.handleDecode(args);
-                    break;
-                case "encode":
-                    await CliController.handleEncode(args);
-                    break;
-                case "names":
-                    await CliController.handleNames(args);
-                    break;
-            }
-        }
+        // if (progCmd) {
+        //     const subCmd = progCmd.matches.subcommand;
+        //     const args = subCmd.matches.args;
+        //     const cmd = subCmd.name;
+        //     switch (cmd) {
+        //         case "show":
+        //             await CliController.handleShow(subCmd);
+        //             break;
+        //         case "decode":
+        //             await CliController.handleDecode(args);
+        //             break;
+        //         case "encode":
+        //             await CliController.handleEncode(args);
+        //             break;
+        //         case "names":
+        //             await CliController.handleNames(args);
+        //             break;
+        //     }
+        // }
         
         outputToTerminal("Done!");
 

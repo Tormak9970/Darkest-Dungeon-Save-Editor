@@ -43,7 +43,7 @@
     },
     "bundle": {
       "active": true,
-      "category": "DeveloperTool",
+      "category": "Utility",
       "copyright": "Copyright Travis Lane 2022",
       "deb": { "depends": [] },
       "externalBin": [],
@@ -183,7 +183,7 @@
         "fullscreen": false,
         "height": 740,
         "resizable": true,
-        "title": "DarkestDungeon Save Editor",
+        "title": "Darkest Dungeon Save Editor",
         "width": 1170,
         "decorations": false,
         "center": true,
