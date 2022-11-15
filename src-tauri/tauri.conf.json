@@ -141,7 +141,7 @@
         "names": {
           "description": "Generates a txt file containing the names of DarkestDungeon save file fields",
           "longDescription": "Generates a txt file containing the names of DarkestDungeon save file fields",
-          "afterHelp": "you can run the command with ddseditor names [--output, -o <outfile>] [...dirs]\nwhere:\n<outfile> is the path of the output file\n[..dirs] is a space sperated list of directories containing game data",
+          "afterHelp": "you can run the command with ddseditor names [--output, -o <outfile>] [...dirs]\nwhere:\n<outfile> is the path of the output file\n[..dirs] is a space seperated list of directories containing game data",
           "args": [
             {
               "name": "output",
