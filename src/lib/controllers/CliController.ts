@@ -47,30 +47,34 @@ export class CliController {
      */
     static async init(matches:CliMatches, mainWindow:WebviewWindow) {
         const progCmd = matches.subcommand;
+        const args = matches.args;
+        const cmdName = progCmd?.name;
         
-        outputToTerminal("Checking arguments...");
+        if (cmdName && cmdName != "") {
+            switch (cmdName) {
+                case "show":
+                    await CliController.handleShow(progCmd);
+                    break;
+                case "decode":
+                    await CliController.handleDecode(args);
+                    break;
+                case "encode":
+                    await CliController.handleEncode(args);
+                    break;
+                case "names":
+                    await CliController.handleNames(args);
+                    break;
+            }
+        } else if (Object.entries(args).length > 0) {
+            const arg = Object.entries(args)[0];
+            switch (arg[0]) {
+                case "help":
+                    outputToTerminal(arg[1].value as string);
+                    break;
+            }
+        }
         
-        // if (progCmd) {
-        //     const subCmd = progCmd.matches.subcommand;
-        //     const args = subCmd.matches.args;
-        //     const cmd = subCmd.name;
-        //     switch (cmd) {
-        //         case "show":
-        //             await CliController.handleShow(subCmd);
-        //             break;
-        //         case "decode":
-        //             await CliController.handleDecode(args);
-        //             break;
-        //         case "encode":
-        //             await CliController.handleEncode(args);
-        //             break;
-        //         case "names":
-        //             await CliController.handleNames(args);
-        //             break;
-        //     }
-        // }
-        
-        outputToTerminal("Done!");
+        outputToTerminal("\n\nDone!\n\n");
 
         await mainWindow.close();
     }

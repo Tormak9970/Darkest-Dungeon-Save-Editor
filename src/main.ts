@@ -27,17 +27,15 @@ const app = new App({
 
 getMatches().then((matches) => {
   const mainWindow = getCurrent();
-  const baseArgs = matches?.args;
-  const bArgsLen = Object.keys(baseArgs).length > 0;
-  const cmdArgs = matches?.subcommand?.matches?.subcommand?.matches.args;
-  const cArgsLen = cmdArgs ? Object.keys(cmdArgs).length > 0 : false;
+  const bArgsLen = Object.keys(matches?.args).length > 0;
+  const cmdName = matches?.subcommand?.name;
   
-  // mainWindow.show();
-  // console.log(matches);
-  if ((baseArgs && bArgsLen) || (cmdArgs && cArgsLen)) {
+  mainWindow.show();
+  console.log(matches);
+  if (bArgsLen || (cmdName && cmdName != "")) {
     CliController.init(matches, mainWindow);
   } else {
-    mainWindow.show();
+    // mainWindow.show();
   }
 });
 
